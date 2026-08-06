@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#08090A; }
+  body { font-family:'JetBrains Mono', ui-monospace, monospace; -webkit-font-smoothing:antialiased; }
+  a { color:#CCFF00; text-decoration:none; }
+  a:hover { color:#E4FF6B; }
+  img { image-rendering:pixelated; }
+  input, textarea, select { font-family:'JetBrains Mono', monospace; }
+  ::placeholder { color:#4E5747; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+  @keyframes tickPulse { 0%,100%{opacity:1} 50%{opacity:0.65} }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#08090A; color:#C4CCBB">
+
+  <sc-if value="{{ gateOpen }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px">
+    <div style="border:1px solid #2C3327; background:#0E110C; padding:40px 36px; max-width:400px; width:100%; text-align:center">
+      <div style="font:800 14px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.12em">THE BOARDROOM</div>
+      <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em; margin-top:8px">ADMIN ACCESS</div>
+      <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:18px">Connect the operator wallet to manage this tournament. Only wallets on the operator allowlist can enter.</div>
+      <sc-if value="{{ gateError }}"><div style="border:1px solid #5A2A20; background:#170D0A; color:#F0644B; padding:10px 12px; font:400 10px/1.6 'JetBrains Mono',monospace; margin-top:16px">0x9c1…07B is not on the operator allowlist.</div></sc-if>
+      <div onClick="{{ connectAdmin }}" style="cursor:pointer; margin-top:20px; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:14px 18px; font:800 11px/1 'JetBrains Mono',monospace; letter-spacing:0.12em">CONNECT WALLET</div>
+      <div onClick="{{ connectWrongWallet }}" style="cursor:pointer; margin-top:10px; font:400 10px/1 'JetBrains Mono',monospace; color:#4E5747">try a non-operator wallet</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ gateClosed }}">
+  <div style="display:flex; flex-wrap:wrap; gap:8px; padding:16px clamp(14px,4vw,48px); border-bottom:1px solid #161914; align-items:center; position:sticky; top:0; background:#08090A; z-index:40">
+    <div style="font:800 13px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.12em; margin-right:10px; border-bottom:2px solid #CCFF00; padding-bottom:4px">THE BOARDROOM</div>
+    <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#08090A; background:#E5B531; padding:5px 8px; letter-spacing:0.1em">ADMIN</div>
+    <a href="The Boardroom.dc.html" style="margin-left:16px; font:400 11px/1 'JetBrains Mono',monospace; color:#6C7563">← BACK TO PUBLIC APP</a>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:14px">
+      <div style="border:1px solid #2C3327; color:#C4CCBB; padding:9px 13px; font:400 11px/1 'JetBrains Mono',monospace">0x25…1A50 · OPERATOR</div>
+      <span style="width:8px; height:8px; background:{{ statusColor }}; display:block; animation:pulse 2.2s ease-in-out infinite"></span>
+      <span style="font:700 10px/1 'JetBrains Mono',monospace; color:{{ statusColor }}; letter-spacing:0.12em">{{ statusLabel }}</span>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:6px; padding:14px clamp(14px,4vw,48px) 0; flex-wrap:wrap; border-bottom:1px solid #161914">
+    <div onClick="{{ goTab.overview }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.overview }}; border-bottom:2px solid {{ tabUnderline.overview }}">OVERVIEW</div>
+    <div onClick="{{ goTab.setup }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.setup }}; border-bottom:2px solid {{ tabUnderline.setup }}">TOURNAMENT SETUP</div>
+    <div onClick="{{ goTab.bracket }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.bracket }}; border-bottom:2px solid {{ tabUnderline.bracket }}">BRACKET</div>
+    <div onClick="{{ goTab.projects }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.projects }}; border-bottom:2px solid {{ tabUnderline.projects }}">PROJECTS</div>
+    <div onClick="{{ goTab.submissions }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.submissions }}; border-bottom:2px solid {{ tabUnderline.submissions }}">SUBMISSIONS</div>
+    <div onClick="{{ goTab.qa }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.qa }}; border-bottom:2px solid {{ tabUnderline.qa }}">Q&amp;A MODERATION</div>
+    <div onClick="{{ goTab.waitlist }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.waitlist }}; border-bottom:2px solid {{ tabUnderline.waitlist }}">WAITLIST</div>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1300px">
+
+    <div style="border:2px solid {{ statusColor }}; background:#0E110C; padding:24px 26px; display:flex; flex-wrap:wrap; gap:24px; align-items:center">
+      <div style="flex:1; min-width:240px">
+        <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.16em">SEASON 01 · QUARTERFINAL</div>
+        <div style="font:800 20px/1.3 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:8px">{{ statusLabel }}</div>
+        <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">8 projects · Quarterfinal opened Jul 8 · closes in {{ countdown }}</div>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <div onClick="{{ togglePause }}" style="cursor:pointer; border:1px solid #5A4A1E; color:#E5B531; padding:12px 18px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">{{ pauseLabel }}</div>
+        <div onClick="{{ confirmCancel }}" style="cursor:pointer; border:1px solid #5A2A20; color:#F0644B; padding:12px 18px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">CANCEL TOURNAMENT</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ cancelOpen }}">
+      <div style="border:1px solid #5A2A20; background:#170D0A; padding:16px 20px; margin-top:14px; display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+        <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#E4C7C1; flex:1; min-width:220px">Cancel Season 01? All open ballots void. Escrowed backing becomes withdrawable. This can't be undone.</div>
+        <div style="display:flex; gap:8px">
+          <div onClick="{{ doCancel }}" style="cursor:pointer; border:2px solid #F0644B; color:#F0644B; padding:11px 16px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">YES, CANCEL</div>
+          <div onClick="{{ confirmCancel }}" style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">BACK</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:20px">
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">BALLOTS SEALED</div><div style="font:800 26px/1 'JetBrains Mono',monospace; color:#CCFF00; margin-top:10px">24,118</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">$STONKBROKER ESCROWED</div><div style="font:800 26px/1 'JetBrains Mono',monospace; color:#E5B531; margin-top:10px">1,402,000</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">PROJECTS LIVE</div><div style="font:800 26px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">8 / 8</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">OPEN QUESTIONS</div><div style="font:800 26px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">6</div></div>
+    </div>
+
+    <div style="font:800 14px/1 'JetBrains Mono',monospace; color:#F2F5EF; letter-spacing:0.06em; margin:34px 0 14px">RECENT ACTIVITY</div>
+    <div style="border:1px solid #23271F; background:#0E110C">
+      <sc-for list="{{ activityList }}" as="a" hint-placeholder-count="4">
+        <div style="padding:13px 18px; border-bottom:1px solid #1A1E16; display:flex; gap:14px; align-items:center; font:400 11px/1 'JetBrains Mono',monospace">
+          <span style="color:{{ a.color }}; flex:none">{{ a.mark }}</span>
+          <span style="color:#C4CCBB; flex:1">{{ a.text }}</span>
+          <span style="color:#4E5747">{{ a.time }}</span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ TOURNAMENT SETUP ============ -->
+  <sc-if value="{{ isSetup }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:900px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">SEASON 02 SETUP</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Configure the next tournament before it opens. Season 01 stays live until you start Season 02.</div>
+
+    <div style="display:flex; flex-direction:column; gap:20px; margin-top:26px">
+      <div>
+        <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">TOURNAMENT DESCRIPTION</label>
+        <textarea rows="3" placeholder="A short description shown on the lobby hero…" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1.6 'JetBrains Mono',monospace; resize:vertical"></textarea>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px">
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">NUMBER OF PROJECTS</label>
+          <select style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace">
+            <option>8</option><option>16</option><option>32</option>
+          </select>
+        </div>
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">VOTING ROUND DURATION</label>
+          <select style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace">
+            <option>24 hours</option><option>48 hours</option><option selected="">72 hours</option><option>5 days</option><option>7 days</option>
+          </select>
+        </div>
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">MIN $STONKBROKER TO VOTE</label>
+          <input type="text" value="1,000" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/>
+        </div>
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">MIN $STONKBROKER TO BACK</label>
+          <input type="text" value="888" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #5A4A1E; background:#12100A; color:#E5B531; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/>
+        </div>
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">START DATE</label>
+          <input type="date" value="2026-09-01" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/>
+        </div>
+        <div>
+          <label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">END DATE</label>
+          <input type="date" value="2026-09-22" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:6px; flex-wrap:wrap">
+        <div style="border:1px solid #2C3327; color:#8A9184; padding:12px 18px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer">SAVE DRAFT</div>
+        <div onClick="{{ startTournament }}" style="border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:12px 18px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer">START SEASON 02</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ BRACKET ============ -->
+  <sc-if value="{{ isBracket }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1100px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">BRACKET</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Assign who plays whom. Matchups lock once a round opens for voting.</div>
+
+    <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em; margin:26px 0 12px">QUARTERFINAL · LIVE, LOCKED</div>
+    <div style="display:flex; flex-direction:column; gap:10px">
+      <sc-for list="{{ qfRooms }}" as="room" hint-placeholder-count="4">
+        <div style="border:1px solid #23271F; background:#0E110C; padding:14px 18px; display:grid; grid-template-columns:60px 1fr 40px 1fr 120px; gap:14px; align-items:center">
+          <div style="font:800 12px/1 'JetBrains Mono',monospace; color:#6C7563">R{{ room.n }}</div>
+          <div style="display:flex; align-items:center; gap:10px"><img src="{{ room.markA }}" alt="" style="width:28px;height:28px"><span style="font:700 12px/1 'JetBrains Mono',monospace; color:#F2F5EF">{{ room.nameA }}</span></div>
+          <div style="text-align:center; font:800 10px/1 'JetBrains Mono',monospace; color:#4E5747">VS</div>
+          <div style="display:flex; align-items:center; gap:10px"><img src="{{ room.markB }}" alt="" style="width:28px;height:28px"><span style="font:700 12px/1 'JetBrains Mono',monospace; color:#F2F5EF">{{ room.nameB }}</span></div>
+          <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#4ADE80; letter-spacing:0.06em; text-align:right">LOCKED</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em; margin:30px 0 12px">SEMIFINAL · SET AFTER QUARTERFINAL RESULTS</div>
+    <div style="border:1px dashed #2C3327; padding:22px; text-align:center; font:400 11px/1.7 'JetBrains Mono',monospace; color:#4E5747">Semifinal matchups unlock for editing once all 4 quarterfinal rooms have a winner. Winners are auto-seeded 1v4 / 2v3 by ballot count; you can override before the round opens.</div>
+
+    <div style="display:flex; gap:10px; margin-top:20px">
+      <div style="border:1px solid #2C3327; color:#8A9184; padding:12px 18px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; cursor:pointer">EXPORT BRACKET</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PROJECTS ============ -->
+  <sc-if value="{{ isProjects }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1300px">
+
+    <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; justify-content:space-between">
+      <div>
+        <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">PROJECTS</div>
+        <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:6px">Invite teams, track onboarding, review what they've submitted.</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <input value="{{ inviteVal }}" onChange="{{ setInvite }}" type="text" placeholder="project@email.com or 0x…" style="border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:11px 14px; font:400 11px/1 'JetBrains Mono',monospace; width:220px"/>
+        <div onClick="{{ sendInvite }}" style="cursor:pointer; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:11px 16px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">SEND INVITE</div>
+      </div>
+    </div>
+
+    <sc-if value="{{ inviteSent }}">
+      <div style="border:1px solid #24331B; background:#0C1008; padding:14px 16px; margin-top:12px">
+        <div style="font:400 10px/1.6 'JetBrains Mono',monospace; color:#4ADE80">Invite sent to {{ lastInvite }} — join link expires in 7 days.</div>
+        <div style="display:flex; align-items:center; gap:10px; margin-top:10px; flex-wrap:wrap">
+          <div style="border:1px solid #23271F; background:#08090A; color:#8A9184; padding:8px 12px; font:400 10px/1 'JetBrains Mono',monospace">theboardroom.xyz/onboard/{{ inviteToken }}</div>
+          <div onClick="{{ previewInvite }}" style="cursor:pointer; font:700 10px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.06em">PREVIEW AS PROJECT ↗</div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="border:1px solid #23271F; background:#0E110C; margin-top:22px">
+      <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:10px; padding:12px 18px; border-bottom:1px solid #23271F; font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">
+        <div>PROJECT</div><div>STATUS</div><div>ASSETS COMPLETE</div><div></div>
+      </div>
+      <sc-for list="{{ roster }}" as="p" hint-placeholder-count="8">
+        <div style="display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:10px; padding:13px 18px; border-bottom:1px solid #1A1E16; align-items:center; transition:background 130ms ease" style-hover="background:#12160D">
+          <div style="display:flex; align-items:center; gap:12px">
+            <img src="{{ p.mark }}" alt="" style="width:34px; height:34px; flex:none">
+            <div>
+              <div style="font:800 12px/1.3 'JetBrains Mono',monospace; color:#F2F5EF">{{ p.name }}</div>
+              <div style="font:400 10px/1.5 'JetBrains Mono',monospace; color:#6C7563">{{ p.founder }}</div>
+            </div>
+          </div>
+          <div style="font:700 10px/1 'JetBrains Mono',monospace; color:{{ p.statusColor }}; letter-spacing:0.08em">{{ p.status }}</div>
+          <div style="font:400 11px/1 'JetBrains Mono',monospace; color:#8A9184">{{ p.assetsDone }} / 6</div>
+          <div onClick="{{ p.open }}" style="cursor:pointer; font:700 10px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.08em; justify-self:start">VIEW ↗</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ detailOpen }}">
+    <div onClick="{{ closeDetail }}" style="position:fixed; inset:0; background:rgba(4,5,4,0.72); z-index:60; display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; overflow-y:auto">
+      <div onClick="{{ stopClick }}" style="background:#0B0E08; border:1px solid #2C3327; max-width:760px; width:100%">
+        <div style="padding:20px 26px; border-bottom:1px solid #23271F; display:flex; align-items:center; gap:16px">
+          <img src="{{ detailProj.mark }}" alt="" style="width:48px; height:48px">
+          <div style="flex:1">
+            <div style="font:800 16px/1.3 'JetBrains Mono',monospace; color:#F2F5EF">{{ detailProj.name }}</div>
+            <div style="font:400 10px/1.5 'JetBrains Mono',monospace; color:#6C7563">{{ detailProj.founder }} · {{ detailProj.status }}</div>
+          </div>
+          <div onClick="{{ closeDetail }}" style="cursor:pointer; color:#6C7563; font:700 16px/1 'JetBrains Mono',monospace">×</div>
+        </div>
+        <div style="padding:22px 26px; display:flex; flex-direction:column; gap:16px">
+          <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px">
+            <div style="border:1px solid #23271F; padding:12px 14px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">VIDEO PITCH</div><div style="font:700 11px/1.6 'JetBrains Mono',monospace; color:{{ detailProj.videoColor }}; margin-top:7px">{{ detailProj.videoStatus }}</div></div>
+            <div style="border:1px solid #23271F; padding:12px 14px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">TRACTION</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace; color:#C4CCBB; margin-top:7px">{{ detailProj.traction }}</div></div>
+            <div style="border:1px solid #23271F; padding:12px 14px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">X PROFILE</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace; color:#C4CCBB; margin-top:7px">{{ detailProj.x }}</div></div>
+            <div style="border:1px solid #23271F; padding:12px 14px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">WEBSITE</div><div style="font:400 11px/1.6 'JetBrains Mono',monospace; color:#C4CCBB; margin-top:7px">{{ detailProj.site }}</div></div>
+          </div>
+          <div style="border-top:1px solid #1A1E16; padding-top:14px">
+            <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em; margin-bottom:10px">FOUNDER / TEAM SUBMITTED</div>
+            <div style="font:400 11px/1.8 'JetBrains Mono',monospace; color:#C4CCBB">{{ detailProj.teamText }}</div>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap">
+            <div onClick="{{ detailProj.approve }}" style="cursor:pointer; border:2px solid #4ADE80; color:#4ADE80; padding:11px 16px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">APPROVE FOR ROUND</div>
+            <div style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">REQUEST CHANGES</div>
+            <div onClick="{{ toggleRemoveConfirm }}" style="cursor:pointer; border:1px solid #5A2A20; color:#F0644B; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">REMOVE FROM SEASON</div>
+          </div>
+          <sc-if value="{{ removeConfirmOpen }}">
+            <div style="border:1px solid #5A2A20; background:#170D0A; padding:14px 16px; display:flex; align-items:center; gap:14px; flex-wrap:wrap">
+              <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#E4C7C1; flex:1; min-width:200px">Remove {{ detailProj.name }} from Season 01? Any ballots cast for them become void and backing becomes withdrawable. This can't be undone.</div>
+              <div style="display:flex; gap:8px">
+                <div onClick="{{ doRemove }}" style="cursor:pointer; border:2px solid #F0644B; color:#F0644B; padding:10px 14px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">YES, REMOVE</div>
+                <div onClick="{{ toggleRemoveConfirm }}" style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:10px 14px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">BACK</div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ SUBMISSIONS ============ -->
+  <sc-if value="{{ isSubmissions }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1100px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">VIDEO PITCH SUBMISSIONS</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:6px">Review before a pitch goes live in a room. Once approved it appears on the public compare screen.</div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:22px">
+      <sc-for list="{{ submissions }}" as="s" hint-placeholder-count="3">
+        <div style="border:1px solid #23271F; background:#0E110C; padding:16px 18px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; transition:border-color 130ms ease" style-hover="border-color:#3D4536">
+          <img src="{{ s.mark }}" alt="" style="width:40px; height:40px; flex:none">
+          <div style="flex:1; min-width:180px">
+            <div style="font:800 12px/1.3 'JetBrains Mono',monospace; color:#F2F5EF">{{ s.name }}</div>
+            <div style="font:400 10px/1.6 'JetBrains Mono',monospace; color:#6C7563">Submitted {{ s.when }} · {{ s.length }}</div>
+          </div>
+          <div style="border:1px solid #2C3327; padding:10px 24px; font:700 10px/1 'JetBrains Mono',monospace; color:#8A9184; letter-spacing:0.08em">▶ WATCH</div>
+          <div style="font:700 10px/1 'JetBrains Mono',monospace; color:{{ s.statusColor }}; letter-spacing:0.08em; min-width:90px">{{ s.status }}</div>
+          <div style="display:flex; gap:8px">
+            <div onClick="{{ s.approve }}" style="cursor:pointer; border:2px solid #4ADE80; color:#4ADE80; padding:10px 14px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">APPROVE</div>
+            <div onClick="{{ s.reject }}" style="cursor:pointer; border:1px solid #5A2A20; color:#F0644B; padding:10px 14px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">REJECT</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ Q&A MODERATION ============ -->
+  <sc-if value="{{ isQa }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1100px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">Q&amp;A MODERATION</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:6px">Every question posts publicly by default. Hide spam or abuse; unanswered questions otherwise stay on the permanent record.</div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:22px">
+      <sc-for list="{{ qaMod }}" as="q" hint-placeholder-count="4">
+        <div style="border:1px solid #23271F; border-left:2px solid {{ q.borderColor }}; background:#0E110C; padding:15px 18px; display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; transition:border-color 130ms ease" style-hover="border-color:#3D4536">
+          <div style="flex:1; min-width:240px">
+            <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.1em">{{ q.project }} · {{ q.asker }}</div>
+            <div style="font:400 11px/1.6 'JetBrains Mono',monospace; color:#C4CCBB; margin-top:7px">{{ q.text }}</div>
+            <sc-if value="{{ q.answer }}"><div style="font:400 10px/1.6 'JetBrains Mono',monospace; color:#4ADE80; margin-top:8px">↳ answered · {{ q.answer }}</div></sc-if>
+          </div>
+          <div style="font:700 10px/1 'JetBrains Mono',monospace; color:{{ q.flagColor }}; letter-spacing:0.08em">{{ q.flag }}</div>
+          <div style="display:flex; gap:8px">
+            <div onClick="{{ q.notify }}" style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:9px 13px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.06em">NOTIFY TEAM</div>
+            <div onClick="{{ q.hide }}" style="cursor:pointer; border:1px solid #5A2A20; color:#F0644B; padding:9px 13px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.06em">{{ q.hideLabel }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  </sc-if>
+
+  <!-- ============ WAITLIST ============ -->
+  <sc-if value="{{ isWaitlist }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1200px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">SEASON 02 WAITLIST</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Applications from the public "Apply" page. Inviting a project here sends the same onboarding link as Projects → Send Invite.</div>
+
+    <div style="border:1px solid #23271F; background:#0E110C; margin-top:22px">
+      <div style="display:grid; grid-template-columns:1.6fr 1.6fr 1fr 1fr; gap:10px; padding:12px 18px; border-bottom:1px solid #23271F; font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">
+        <div>PROJECT</div><div>ONE-LINER</div><div>SUBMITTED</div><div></div>
+      </div>
+      <sc-for list="{{ waitlist }}" as="w" hint-placeholder-count="4">
+        <div style="display:grid; grid-template-columns:1.6fr 1.6fr 1fr 1fr; gap:10px; padding:13px 18px; border-bottom:1px solid #1A1E16; align-items:center; transition:background 130ms ease" style-hover="background:#12160D">
+          <div><div style="font:800 12px/1.3 'JetBrains Mono',monospace; color:#F2F5EF">{{ w.name }}</div><div style="font:400 10px/1.5 'JetBrains Mono',monospace; color:#6C7563">{{ w.founder }} · {{ w.x }}</div></div>
+          <div style="font:400 11px/1.5 'JetBrains Mono',monospace; color:#8A9184">{{ w.line }}</div>
+          <div style="font:400 10px/1 'JetBrains Mono',monospace; color:#6C7563">{{ w.when }}</div>
+          <div style="display:flex; gap:8px">
+            <div onClick="{{ w.invite }}" style="cursor:pointer; border:2px solid #CCFF00; color:#CCFF00; padding:8px 12px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.06em">{{ w.inviteLabel }}</div>
+            <div onClick="{{ w.decline }}" style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:8px 12px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.06em">DECLINE</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const ROSTER = [
+  { key:'A', name:'LEDGERBOY', founder:'Mira Okonkwo', mark:'marks/ledgerboy.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:6, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'Testnet app · 3,100 wallets', x:'@ledgerboy', site:'ledgerboy.xyz', teamText:'Mira Okonkwo (Founder, @miraok), Devin Pratt (Protocol, @dev_pratt), 2 pseudonymous contributors.' },
+  { key:'B', name:'VAULTMOUSE', founder:'Sasha Reyes', mark:'marks/vaultmouse.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:6, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'420 active savers · $180K TVL', x:'@vaultmouse', site:'vaultmouse.app', teamText:'Sasha Reyes (Founder, @sashabuilds), 1 pseudonymous contributor.' },
+  { key:'C', name:'PAPERHANDS ANONYMOUS', founder:'Tobias Lund', mark:'marks/paperhands.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:5, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'890 lockup commitments', x:'@paperhandsanon', site:'paperhands.group', teamText:'Tobias Lund (Founder, @toblund), 2 pseudonymous contributors.' },
+  { key:'D', name:'TICKERTAPE', founder:'Ines Duval', mark:'marks/tickertape.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:6, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'12,400 clips posted', x:'@tickertape', site:'tickertape.fm', teamText:'Ines Duval (Founder, @inesduval), Ray Castellanos (Data, @raycstl), Priya Nadkarni (Audio, @priyandk), 2 pseudonymous.' },
+  { key:'E', name:'DIVIDEND DINER', founder:'Omar Haddad', mark:'marks/dividenddiner.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:6, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'$2.1M strategies listed', x:'@dividenddiner', site:'dividenddiner.xyz', teamText:'Omar Haddad (Founder, @omarhaddad), June Park (Risk, @junepark).' },
+  { key:'F', name:'MARGIN CALL FM', founder:'Cal Whitaker', mark:'marks/margincallfm.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:5, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'6,800 live listeners peak', x:'@margincallfm', site:'margincall.fm', teamText:'Cal Whitaker (Founder, @calwhitaker), 2 pseudonymous contributors.' },
+  { key:'G', name:'FILING CABINET', founder:'Hana Suzuki', mark:'marks/filingcabinet.png', status:'LIVE', statusColor:'#4ADE80', assetsDone:6, videoStatus:'APPROVED', videoColor:'#4ADE80', traction:'340 TB archived', x:'@filingcabinet', site:'filingcabinet.org', teamText:'Hana Suzuki (Founder, @hanasuzuki), Gene Alvarez (Infra, @genealv), Nour Bakri (Audit, @nourbakri), Ted Moss (Ops, @tedmoss).' },
+  { key:'H', name:'SEVEN FIGURE SODA', founder:'Blake Iyer', mark:'marks/sevenfiguresoda.png', status:'ONBOARDING', statusColor:'#E5B531', assetsDone:3, videoStatus:'AWAITING SUBMISSION', videoColor:'#E5B531', traction:'—', x:'@sevenfiguresoda', site:'sevenfigure.soda', teamText:'Blake Iyer (Founder, @blakeiyer) — traction and X profile still pending.' }
+].map(p => ({ ...p, status: p.status === 'LIVE' ? 'APPROVED' : p.status }));
+
+class Component extends DCLogic {
+  state = { gate:'locked', tab:'overview', tourStatus:'live', cancelOpen:false, inviteVal:'', lastInvite:null,
+    inviteToken:null, detailKey:null, subApproved:{}, qaHidden:{}, removeConfirmOpen:false, waitlistDecided:{} };
+
+  renderVals(){
+    const s = this.state;
+    const tabs = ['overview','setup','bracket','projects','submissions','qa','waitlist'];
+    const tabColor = {}, tabUnderline = {}, goTab = {};
+    tabs.forEach(t => {
+      const active = s.tab === t;
+      tabColor[t] = active ? '#CCFF00' : '#6C7563';
+      tabUnderline[t] = active ? '#CCFF00' : 'transparent';
+      goTab[t] = () => this.setState({ tab:t });
+    });
+
+    const statusMap = { live:['LIVE',"#4ADE80"], paused:['PAUSED','#E5B531'], ended:['ENDED','#6C7563'] };
+    const [statusLabel, statusColor] = statusMap[s.tourStatus] || statusMap.live;
+
+    const QF = [
+      { n:1, markA:'marks/ledgerboy.png', nameA:'LEDGERBOY', markB:'marks/vaultmouse.png', nameB:'VAULTMOUSE' },
+      { n:2, markA:'marks/paperhands.png', nameA:'PAPERHANDS ANONYMOUS', markB:'marks/tickertape.png', nameB:'TICKERTAPE' },
+      { n:3, markA:'marks/dividenddiner.png', nameA:'DIVIDEND DINER', markB:'marks/margincallfm.png', nameB:'MARGIN CALL FM' },
+      { n:4, markA:'marks/filingcabinet.png', nameA:'FILING CABINET', markB:'marks/sevenfiguresoda.png', nameB:'SEVEN FIGURE SODA' }
+    ];
+
+    const roster = ROSTER.map(p => ({ ...p, open: () => this.setState({ detailKey: p.key, removeConfirmOpen:false }) }));
+    const detailProj = s.detailKey ? { ...ROSTER.find(p => p.key === s.detailKey), approve: () => this.setState({ detailKey:null }) } : ROSTER[0];
+
+    const SUBS = [
+      { key:'A', name:'LEDGERBOY', mark:'marks/ledgerboy.png', when:'3d ago', length:'0:19' },
+      { key:'H', name:'SEVEN FIGURE SODA', mark:'marks/sevenfiguresoda.png', when:'6h ago', length:'0:22' },
+      { key:'D', name:'TICKERTAPE — reshoot', mark:'marks/tickertape.png', when:'1h ago', length:'0:17' }
+    ];
+    const submissions = SUBS.map(sub => {
+      const decided = s.subApproved[sub.key];
+      const status = decided === 'approved' ? 'APPROVED' : decided === 'rejected' ? 'REJECTED' : 'PENDING';
+      const statusColor = decided === 'approved' ? '#4ADE80' : decided === 'rejected' ? '#F0644B' : '#E5B531';
+      return { ...sub, status, statusColor,
+        approve: () => this.setState({ subApproved: { ...s.subApproved, [sub.key]:'approved' } }),
+        reject: () => this.setState({ subApproved: { ...s.subApproved, [sub.key]:'rejected' } }) };
+    });
+
+    const QAMOD = [
+      { id:'q1', project:'LEDGERBOY', asker:'0x71…C3F0', text:'What happens to receipts if a wallet gets rotated to a new address?', answer:'Bound to the tx hash, not the wallet.', flag:null },
+      { id:'q2', project:'VAULTMOUSE', asker:'0x9F…4401', text:"What's the plan if volume dies in month two?", answer:null, flag:null },
+      { id:'q3', project:'SEVEN FIGURE SODA', asker:'0x22…88AF', text:'buy my coin!!! check bio for 100x gem 🚀🚀🚀', answer:null, flag:'LIKELY SPAM' },
+      { id:'q4', project:'MARGIN CALL FM', asker:'0x4E…2290', text:'Is liquidation audio generated live or pre-recorded?', answer:'Live, pulled from onchain events.', flag:null }
+    ];
+    const qaMod = QAMOD.map(q => {
+      const hidden = !!s.qaHidden[q.id];
+      return { ...q, flagColor: q.flag ? '#F0644B' : 'transparent', hideLabel: hidden ? 'UNHIDE' : 'HIDE',
+        notify: () => {}, hide: () => this.setState({ qaHidden: { ...s.qaHidden, [q.id]: !hidden } }) };
+    });
+
+    return {
+      isOverview: s.tab==='overview', isSetup: s.tab==='setup', isBracket: s.tab==='bracket', isProjects: s.tab==='projects',
+      isSubmissions: s.tab==='submissions', isQa: s.tab==='qa',
+      tabColor, tabUnderline, goTab,
+      statusLabel, statusColor, countdown:'2d 07:03:18',
+      pauseLabel: s.tourStatus === 'paused' ? 'RESUME TOURNAMENT' : 'PAUSE TOURNAMENT',
+      togglePause: () => this.setState({ tourStatus: s.tourStatus === 'paused' ? 'live' : 'paused' }),
+      cancelOpen: s.cancelOpen,
+      confirmCancel: () => this.setState({ cancelOpen: !s.cancelOpen }),
+      doCancel: () => this.setState({ tourStatus:'ended', cancelOpen:false }),
+      activityList: [
+        { mark:'✓', color:'#4ADE80', text:'LEDGERBOY answered "Who holds the multisig keys?"', time:'12m ago' },
+        { mark:'◆', color:'#E5B531', text:'0x2f…91A backed 5,000 $STONKBROKER on TICKERTAPE', time:'40m ago' },
+        { mark:'!', color:'#F0644B', text:'Question flagged as spam on SEVEN FIGURE SODA', time:'1h ago' },
+        { mark:'✓', color:'#4ADE80', text:'SEVEN FIGURE SODA submitted video pitch', time:'6h ago' }
+      ],
+      inviteVal: s.inviteVal || '', setInvite: (e) => this.setState({ inviteVal: e.target.value }),
+      inviteSent: !!s.lastInvite, lastInvite: s.lastInvite, inviteToken: s.inviteToken,
+      sendInvite: () => { if(!s.inviteVal) return; this.setState({ lastInvite: s.inviteVal, inviteVal:'', inviteToken: Math.random().toString(36).slice(2,8) }); },
+      previewInvite: () => window.open('The Boardroom - Project Portal.dc.html?invite=' + (s.inviteToken || 'demo'), '_blank'),
+      qfRooms: QF,
+      roster, detailOpen: !!s.detailKey, detailProj, closeDetail: () => this.setState({ detailKey:null, removeConfirmOpen:false }),
+      stopClick: (e) => e.stopPropagation(),
+      removeConfirmOpen: s.removeConfirmOpen,
+      toggleRemoveConfirm: () => this.setState({ removeConfirmOpen: !s.removeConfirmOpen }),
+      doRemove: () => this.setState({ detailKey:null, removeConfirmOpen:false }),
+      submissions,
+      qaMod: qaMod.map(q => ({ ...q, borderColor: q.flag ? '#F0644B' : 'transparent' })),
+      isWaitlist: s.tab==='waitlist',
+      waitlist: [
+        { key:'w1', name:'DEADWEIGHT DAO', founder:'Priya Malhotra', x:'@deadweightdao', line:'Governance for tokens whose founders vanished.', when:'2d ago' },
+        { key:'w2', name:'SLIPPAGE SALOON', founder:'Nate Okafor', x:'@slippagesaloon', line:'A trading arena where the house edge is public and onchain.', when:'5d ago' },
+        { key:'w3', name:'COLD STORAGE CLUB', founder:'Wren Sato', x:'@coldstorageclub', line:'Time-locked vaults with social accountability built in.', when:'1w ago' }
+      ].map(w => {
+        const decided = s.waitlistDecided[w.key];
+        return { ...w,
+          inviteLabel: decided === 'invited' ? 'INVITED' : 'INVITE',
+          invite: () => this.setState({ waitlistDecided: { ...s.waitlistDecided, [w.key]:'invited' }, lastInvite:w.founder, inviteToken: Math.random().toString(36).slice(2,8), tab:'projects' }),
+          decline: () => this.setState({ waitlistDecided: { ...s.waitlistDecided, [w.key]:'declined' } }) };
+      }).filter(w => s.waitlistDecided[w.key] !== 'declined'),
+      gateOpen: s.gate !== 'open', gateClosed: s.gate === 'open', gateError: s.gate === 'denied',
+      connectAdmin: () => this.setState({ gate:'open' }),
+      connectWrongWallet: () => this.setState({ gate:'denied' }),
+      startTournament: () => {}
+    };
+  }
+}
+
+</script>
+</body>
+</html>

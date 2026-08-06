@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin:0; padding:0; background:#08090A; }
+  body { font-family:'JetBrains Mono', ui-monospace, monospace; -webkit-font-smoothing:antialiased; }
+  a { color:#CCFF00; text-decoration:none; }
+  a:hover { color:#E4FF6B; }
+  img { image-rendering:pixelated; }
+  input, textarea, select { font-family:'JetBrains Mono', monospace; }
+  ::placeholder { color:#4E5747; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.35} }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#08090A; color:#C4CCBB">
+
+  <sc-if value="{{ gateOpen }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px">
+    <div style="border:1px solid #2C3327; background:#0E110C; padding:40px 36px; max-width:400px; width:100%; text-align:center">
+      <div style="font:800 14px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.12em">THE BOARDROOM</div>
+      <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em; margin-top:8px">PROJECT PORTAL</div>
+      <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:18px">{{ gateCopy }}</div>
+      <div onClick="{{ connectProject }}" style="cursor:pointer; margin-top:20px; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:14px 18px; font:800 11px/1 'JetBrains Mono',monospace; letter-spacing:0.12em">CONNECT WALLET</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ onboardOpen }}">
+  <div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px">
+    <div style="border:1px solid #2C3327; background:#0E110C; padding:36px; max-width:460px; width:100%">
+      <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#8CA05A; letter-spacing:0.14em">CLAIM YOUR INVITE</div>
+      <div style="font:800 18px/1.3 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">Welcome to Season 01</div>
+      <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:10px">Wallet 0x25…1A50 connected. Fill in the basics to claim your room — you can edit everything else once you're in.</div>
+      <div style="display:flex; flex-direction:column; gap:14px; margin-top:22px">
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">PROJECT NAME</label><input type="text" placeholder="e.g. LEDGERBOY" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">FOUNDER NAME</label><input type="text" placeholder="Your name" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.12em">X PROFILE</label><input type="text" placeholder="@handle" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      </div>
+      <div onClick="{{ finishOnboard }}" style="cursor:pointer; margin-top:22px; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:14px 18px; font:800 11px/1 'JetBrains Mono',monospace; letter-spacing:0.12em; text-align:center">ENTER PORTAL</div>
+      <div style="font:400 9px/1.6 'JetBrains Mono',monospace; color:#4E5747; margin-top:12px; text-align:center">Pitch video, traction, team and Q&amp;A come next — assigned room: Quarterfinal 01</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ mainOpen }}">
+  <div style="display:flex; flex-wrap:wrap; gap:8px; padding:16px clamp(14px,4vw,48px); border-bottom:1px solid #161914; align-items:center; position:sticky; top:0; background:#08090A; z-index:40">
+    <div style="font:800 13px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.12em; margin-right:10px; border-bottom:2px solid #CCFF00; padding-bottom:4px">THE BOARDROOM</div>
+    <div style="font:700 10px/1 'JetBrains Mono',monospace; color:#08090A; background:#8CA05A; padding:5px 8px; letter-spacing:0.1em">PROJECT PORTAL</div>
+    <div style="margin-left:auto; display:flex; align-items:center; gap:8px">
+      <span style="width:8px; height:8px; background:{{ statusColor }}; display:block; animation:pulse 2.2s ease-in-out infinite"></span>
+      <span style="font:700 10px/1 'JetBrains Mono',monospace; color:{{ statusColor }}; letter-spacing:0.1em">{{ statusLabel }}</span>
+    </div>
+  </div>
+
+  <sc-if value="{{ feedbackOpen }}">
+    <div style="margin:16px clamp(14px,4vw,48px) 0; border:1px solid #5A4A1E; background:#12100A; padding:16px 20px; display:flex; gap:14px; align-items:flex-start; max-width:1100px">
+      <div style="font:800 10px/1.6 'JetBrains Mono',monospace; color:#E5B531; letter-spacing:0.1em; flex:none">ADMIN FEEDBACK</div>
+      <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#C4B893">Traction numbers look stale — can you confirm the wallet count as of this week before we approve? Everything else looks good.</div>
+    </div>
+  </sc-if>
+
+  <div style="display:flex; gap:6px; padding:14px clamp(14px,4vw,48px) 0; flex-wrap:wrap; border-bottom:1px solid #161914">
+    <div onClick="{{ goTab.overview }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.overview }}; border-bottom:2px solid {{ tabUnderline.overview }}">OVERVIEW</div>
+    <div onClick="{{ goTab.video }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.video }}; border-bottom:2px solid {{ tabUnderline.video }}">PITCH VIDEO</div>
+    <div onClick="{{ goTab.info }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.info }}; border-bottom:2px solid {{ tabUnderline.info }}">PROJECT INFO</div>
+    <div onClick="{{ goTab.team }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.team }}; border-bottom:2px solid {{ tabUnderline.team }}">TEAM</div>
+    <div onClick="{{ goTab.qa }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.qa }}; border-bottom:2px solid {{ tabUnderline.qa }}">Q&amp;A<sc-if value="{{ unansweredCount }}"><span style="margin-left:6px; background:#E5B531; color:#12100A; padding:2px 6px; font:800 9px/1.2 'JetBrains Mono',monospace">{{ unansweredCount }}</span></sc-if></div>
+    <div onClick="{{ goTab.backing }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.backing }}; border-bottom:2px solid {{ tabUnderline.backing }}">BACKING</div>
+    <div onClick="{{ goTab.notifs }}" style="cursor:pointer; padding:11px 16px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em; color:{{ tabColor.notifs }}; border-bottom:2px solid {{ tabUnderline.notifs }}">NOTIFICATIONS</div>
+  </div>
+
+  <!-- ============ OVERVIEW ============ -->
+  <sc-if value="{{ isOverview }}" hint-placeholder-val="{{ true }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:1100px">
+    <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+      <image-slot id="logo" shape="rounded" radius="8" placeholder="Logo" style="width:64px;height:64px; flex:none"></image-slot>
+      <div>
+        <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">LEDGERBOY</div>
+        <div style="font:400 11px/1.6 'JetBrains Mono',monospace; color:#8A9184; margin-top:4px">Quarterfinal · Room 01 vs VAULTMOUSE · closes in 2d 07:03</div>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px; margin-top:26px">
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">SUBMISSION STATUS</div><div style="font:800 15px/1.4 'JetBrains Mono',monospace; color:{{ statusColor }}; margin-top:10px">{{ statusLabel }}</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">PROFILE COMPLETE</div><div style="font:800 22px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">6 / 6</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">OPEN QUESTIONS</div><div style="font:800 22px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">{{ unansweredCount }}</div></div>
+      <div style="border:1px solid #5A4A1E; background:#12100A; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#7A6B42; letter-spacing:0.14em">$STONKBROKER BACKED</div><div style="font:800 22px/1 'JetBrains Mono',monospace; color:#E5B531; margin-top:10px">61,400</div></div>
+    </div>
+
+    <div style="font:800 14px/1 'JetBrains Mono',monospace; color:#F2F5EF; letter-spacing:0.06em; margin:30px 0 12px">SETUP CHECKLIST</div>
+    <div style="border:1px solid #23271F; background:#0E110C">
+      <div style="padding:13px 18px; border-bottom:1px solid #1A1E16; display:flex; gap:12px; align-items:center; font:400 11px/1 'JetBrains Mono',monospace"><span style="color:#4ADE80">✓</span><span style="flex:1; color:#C4CCBB">Pitch video uploaded</span></div>
+      <div style="padding:13px 18px; border-bottom:1px solid #1A1E16; display:flex; gap:12px; align-items:center; font:400 11px/1 'JetBrains Mono',monospace"><span style="color:#4ADE80">✓</span><span style="flex:1; color:#C4CCBB">Traction, token plan and risks filled in</span></div>
+      <div style="padding:13px 18px; border-bottom:1px solid #1A1E16; display:flex; gap:12px; align-items:center; font:400 11px/1 'JetBrains Mono',monospace"><span style="color:#4ADE80">✓</span><span style="flex:1; color:#C4CCBB">Team roster added</span></div>
+      <div style="padding:13px 18px; display:flex; gap:12px; align-items:center; font:400 11px/1 'JetBrains Mono',monospace"><span style="color:#4ADE80">✓</span><span style="flex:1; color:#C4CCBB">X profile and website linked</span></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PITCH VIDEO ============ -->
+  <sc-if value="{{ isVideo }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:800px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">PITCH VIDEO</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Under 20 seconds, unscripted, on camera. One take — no editing. Re-uploading sends it back for admin review before it replaces the live pitch.</div>
+
+    <div style="border:1px solid #23271F; background:#04060A; margin-top:22px; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; position:relative">
+      <div style="text-align:center">
+        <div style="font:700 22px/1 'JetBrains Mono',monospace; color:#CCFF00">▶</div>
+        <div style="font:400 10px/1.6 'JetBrains Mono',monospace; color:#6C7563; margin-top:8px">CURRENT PITCH · 0:19</div>
+      </div>
+      <div style="position:absolute; top:12px; right:12px; border:1px solid #24331B; background:#0C1008; color:#4ADE80; padding:6px 10px; font:700 9px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">LIVE</div>
+    </div>
+
+    <div onClick="{{ triggerUpload }}" style="cursor:pointer; margin-top:14px; border:1px dashed #3D4536; padding:22px; text-align:center; font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184">Drop a new take here, or click to browse. MP4, under 20 seconds.</div>
+    <sc-if value="{{ uploadedNotice }}"><div style="border:1px solid #24331B; background:#0C1008; color:#4ADE80; padding:11px 16px; font:400 10px/1.6 'JetBrains Mono',monospace; margin-top:12px">New take received — queued for admin review.</div></sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ PROJECT INFO ============ -->
+  <sc-if value="{{ isInfo }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:800px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">PROJECT INFO</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">This is what the community sees on your compare card and profile. Keep it current — traction gets checked before approval.</div>
+
+    <div style="display:flex; flex-direction:column; gap:20px; margin-top:24px">
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">PROJECT NAME</label><input type="text" value="LEDGERBOY" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">ONE-LINER</label><input type="text" value="Onchain receipts for people who lose them" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">THESIS — IN YOUR OWN WORDS</label><textarea rows="3" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#C4CCBB; padding:12px 14px; font:400 12px/1.6 'JetBrains Mono',monospace; resize:vertical">Every onchain action leaves a receipt and nobody can read them. We turn raw transaction history into plain-language records you can search, export and hand to an accountant.</textarea></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px">
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">TRACTION</label><input type="text" value="Testnet app · 3,100 wallets" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">TOKEN PLAN</label><input type="text" value="Fee-share · no presale" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">DISCLOSED RISKS</label><input type="text" value="2 disclosed" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">X PROFILE</label><input type="text" value="@ledgerboy" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">WEBSITE</label><input type="text" value="ledgerboy.xyz" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      </div>
+      <div style="display:flex; gap:10px">
+        <div onClick="{{ saveInfo }}" style="cursor:pointer; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:12px 18px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">SAVE CHANGES</div>
+      </div>
+      <sc-if value="{{ infoSaved }}"><div style="border:1px solid #24331B; background:#0C1008; color:#4ADE80; padding:11px 16px; font:400 10px/1.6 'JetBrains Mono',monospace">Saved — resubmitted for admin review since the round is already live.</div></sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ TEAM ============ -->
+  <sc-if value="{{ isTeam }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:800px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">TEAM</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Doxxed members show their X handle publicly, clickable, on your profile. Leave the handle blank to stay pseudonymous.</div>
+
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:22px">
+      <sc-for list="{{ team }}" as="m" hint-placeholder-count="3">
+        <div style="border:1px solid #23271F; background:#0E110C; padding:14px 16px; display:flex; gap:12px; align-items:center; flex-wrap:wrap">
+          <div style="flex:1; min-width:140px; font:800 12px/1.3 'JetBrains Mono',monospace; color:#F2F5EF">{{ m.name }}</div>
+          <div style="width:120px; font:400 11px/1 'JetBrains Mono',monospace; color:#8A9184">{{ m.role }}</div>
+          <div style="width:150px; font:400 11px/1 'JetBrains Mono',monospace; color:{{ m.handleColor }}">{{ m.handleText }}</div>
+          <div onClick="{{ m.remove }}" style="cursor:pointer; font:700 10px/1 'JetBrains Mono',monospace; color:#F0644B; letter-spacing:0.06em">REMOVE</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="border:1px dashed #3D4536; padding:18px; margin-top:16px; display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:10px; align-items:end">
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.1em">NAME</label><input value="{{ newName }}" onChange="{{ setNewName }}" type="text" style="width:100%; box-sizing:border-box; margin-top:6px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:10px 12px; font:400 11px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.1em">ROLE</label><input value="{{ newRole }}" onChange="{{ setNewRole }}" type="text" style="width:100%; box-sizing:border-box; margin-top:6px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:10px 12px; font:400 11px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.1em">X HANDLE (OPTIONAL)</label><input value="{{ newHandle }}" onChange="{{ setNewHandle }}" type="text" placeholder="@handle" style="width:100%; box-sizing:border-box; margin-top:6px; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:10px 12px; font:400 11px/1 'JetBrains Mono',monospace"/></div>
+      <div onClick="{{ addMember }}" style="cursor:pointer; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:10px 16px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">ADD</div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ Q&A ============ -->
+  <sc-if value="{{ isQa }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:900px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">QUESTIONS FROM THE FLOOR</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Answer as many as you can before the round closes. Unanswered questions stay on the record — silence is visible.</div>
+
+    <div style="display:flex; flex-direction:column; gap:12px; margin-top:22px">
+      <sc-for list="{{ qaList }}" as="q" hint-placeholder-count="3">
+        <div style="border:1px solid #23271F; background:#0E110C; padding:15px 18px">
+          <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.1em">{{ q.asker }} · {{ q.up }} UPVOTES</div>
+          <div style="font:400 12px/1.6 'JetBrains Mono',monospace; color:#C4CCBB; margin-top:8px">{{ q.text }}</div>
+          <sc-if value="{{ q.answer }}">
+            <div style="border-left:2px solid #4ADE80; padding-left:12px; margin-top:12px; font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184">{{ q.answer }}</div>
+          </sc-if>
+          <sc-if value="{{ q.answering }}">
+            <div style="margin-top:12px; display:flex; flex-direction:column; gap:8px">
+              <textarea rows="2" value="{{ q.draft }}" onChange="{{ q.setDraft }}" placeholder="Type your answer…" style="width:100%; box-sizing:border-box; border:1px solid #2C3327; background:#0B0E08; color:#F2F5EF; padding:11px 13px; font:400 11px/1.6 'JetBrains Mono',monospace; resize:vertical"></textarea>
+              <div style="display:flex; gap:8px"><div onClick="{{ q.post }}" style="cursor:pointer; border:2px solid #CCFF00; background:#141A06; color:#CCFF00; padding:9px 14px; font:800 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">POST ANSWER</div><div onClick="{{ q.cancel }}" style="cursor:pointer; border:1px solid #2C3327; color:#8A9184; padding:9px 14px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.08em">CANCEL</div></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ q.showReply }}">
+            <div onClick="{{ q.startAnswer }}" style="cursor:pointer; margin-top:10px; display:inline-block; font:700 10px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.08em">REPLY →</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ BACKING ============ -->
+  <sc-if value="{{ isBacking }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:900px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">BACKING</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Read-only — backing never buys votes, and you can't influence who backs you. This is here so you know what's riding on the outcome.</div>
+
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; margin-top:24px">
+      <div style="border:1px solid #5A4A1E; background:#12100A; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#7A6B42; letter-spacing:0.14em">TOTAL BACKED</div><div style="font:800 24px/1 'JetBrains Mono',monospace; color:#E5B531; margin-top:10px">61,400</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">BACKERS</div><div style="font:800 24px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">34</div></div>
+      <div style="border:1px solid #23271F; background:#0E110C; padding:18px 20px"><div style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">RANK VS OTHER 7</div><div style="font:800 24px/1 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:10px">#2</div></div>
+    </div>
+    <div style="border:1px solid #23271F; background:#0E110C; padding:16px 20px; margin-top:20px; font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184">If you win and launch, backers convert at the fixed pre-round price with a vesting schedule — that's between them and the protocol. Nothing here requires action from you.</div>
+  </div>
+  </sc-if>
+
+  <!-- ============ NOTIFICATIONS ============ -->
+  <sc-if value="{{ isNotifs }}">
+  <div style="padding:30px clamp(14px,4vw,48px) 70px; max-width:700px">
+    <div style="font:800 20px/1.2 'JetBrains Mono',monospace; color:#F2F5EF">NOTIFICATIONS</div>
+    <div style="font:400 11px/1.7 'JetBrains Mono',monospace; color:#8A9184; margin-top:8px">Where to reach your team while the round is live.</div>
+
+    <div style="display:flex; flex-direction:column; gap:14px; margin-top:24px">
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">EMAIL</label><input type="text" value="team@ledgerboy.xyz" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      <div style="display:flex; flex-direction:column; gap:10px; border:1px solid #23271F; background:#0E110C; padding:16px 18px">
+        <div style="display:flex; align-items:center; gap:12px"><div onClick="{{ toggleNotif.q }}" style="cursor:pointer; width:36px; height:20px; border-radius:10px; background:{{ notifQBg }}; position:relative; flex:none"><div style="position:absolute; top:2px; left:{{ notifQLeft }}; width:16px; height:16px; border-radius:50%; background:#08090A"></div></div><span style="font:400 11px/1 'JetBrains Mono',monospace; color:#C4CCBB">New question submitted</span></div>
+        <div style="display:flex; align-items:center; gap:12px"><div onClick="{{ toggleNotif.b }}" style="cursor:pointer; width:36px; height:20px; border-radius:10px; background:{{ notifBBg }}; position:relative; flex:none"><div style="position:absolute; top:2px; left:{{ notifBLeft }}; width:16px; height:16px; border-radius:50%; background:#08090A"></div></div><span style="font:400 11px/1 'JetBrains Mono',monospace; color:#C4CCBB">New backing received</span></div>
+        <div style="display:flex; align-items:center; gap:12px"><div onClick="{{ toggleNotif.a }}" style="cursor:pointer; width:36px; height:20px; border-radius:10px; background:{{ notifABg }}; position:relative; flex:none"><div style="position:absolute; top:2px; left:{{ notifALeft }}; width:16px; height:16px; border-radius:50%; background:#08090A"></div></div><span style="font:400 11px/1 'JetBrains Mono',monospace; color:#C4CCBB">Admin requests changes</span></div>
+        <div style="display:flex; align-items:center; gap:12px"><div onClick="{{ toggleNotif.r }}" style="cursor:pointer; width:36px; height:20px; border-radius:10px; background:{{ notifRBg }}; position:relative; flex:none"><div style="position:absolute; top:2px; left:{{ notifRLeft }}; width:16px; height:16px; border-radius:50%; background:#08090A"></div></div><span style="font:400 11px/1 'JetBrains Mono',monospace; color:#C4CCBB">Round results</span></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TEAM = [
+  { id:1, name:'Mira Okonkwo', role:'Founder', handle:'@miraok' },
+  { id:2, name:'Devin Pratt', role:'Protocol', handle:'@dev_pratt' },
+  { id:3, name:'—', role:'Frontend', handle:'' },
+  { id:4, name:'—', role:'Design', handle:'' }
+];
+const QA = [
+  { id:1, asker:'0x71…C3F0', up:38, text:'What happens to receipts if a wallet gets rotated to a new address?', answer:'Receipts are bound to the transaction hash, not the wallet — history stays intact.' },
+  { id:2, asker:'0x2C…91A0', up:22, text:'Do you support multisig wallets or just EOAs right now?', answer:null },
+  { id:3, asker:'0x9F…4401', up:14, text:'Is the export format compatible with common tax software?', answer:null }
+];
+
+class Component extends DCLogic {
+  state = { gate:'locked', onboarded:null, tab:'overview', team: TEAM, newName:'', newRole:'', newHandle:'',
+    qa: QA, answeringId:null, drafts:{}, infoSaved:false, uploadedNotice:false,
+    notif:{ q:true, b:true, a:true, r:true } };
+
+  componentDidMount(){
+    const hasInvite = new URLSearchParams(window.location.search).has('invite');
+    this.setState({ onboarded: hasInvite ? false : true });
+  }
+
+  renderVals(){
+    const s = this.state;
+    const tabs = ['overview','video','info','team','qa','backing','notifs'];
+    const tabColor = {}, tabUnderline = {}, goTab = {};
+    tabs.forEach(t => {
+      const active = s.tab === t;
+      tabColor[t] = active ? '#CCFF00' : '#6C7563';
+      tabUnderline[t] = active ? '#CCFF00' : 'transparent';
+      goTab[t] = () => this.setState({ tab:t });
+    });
+
+    const team = s.team.map(m => ({
+      ...m,
+      handleText: m.handle ? m.handle : 'pseudonymous',
+      handleColor: m.handle ? '#CCFF00' : '#4E5747',
+      remove: () => this.setState({ team: s.team.filter(x => x.id !== m.id) })
+    }));
+
+    const qaList = s.qa.map(q => ({
+      ...q, answering: s.answeringId === q.id, showReply: !q.answer && s.answeringId !== q.id,
+      draft: s.drafts[q.id] || '',
+      setDraft: (e) => this.setState({ drafts: { ...s.drafts, [q.id]: e.target.value } }),
+      startAnswer: () => this.setState({ answeringId: q.id }),
+      cancel: () => this.setState({ answeringId: null }),
+      post: () => {
+        const text = s.drafts[q.id];
+        if(!text) return;
+        this.setState({ qa: s.qa.map(x => x.id === q.id ? { ...x, answer: text } : x), answeringId: null });
+      }
+    }));
+
+    return {
+      gateOpen: s.gate === 'locked',
+      gateCopy: s.onboarded === false ? "You've been invited to join Season 01. Connect the project's wallet to claim your room." : "Connect the wallet your project registered with to manage your Boardroom listing.",
+      connectProject: () => this.setState({ gate:'open' }),
+      onboardOpen: s.gate === 'open' && s.onboarded === false,
+      finishOnboard: () => this.setState({ onboarded:true }),
+      mainOpen: s.gate === 'open' && s.onboarded === true,
+      isOverview: s.tab==='overview', isVideo: s.tab==='video', isInfo: s.tab==='info',
+      isTeam: s.tab==='team', isQa: s.tab==='qa', isBacking: s.tab==='backing', isNotifs: s.tab==='notifs',
+      tabColor, tabUnderline, goTab,
+      statusLabel:'APPROVED · LIVE', statusColor:'#4ADE80',
+      feedbackOpen: false,
+      unansweredCount: s.qa.filter(q => !q.answer).length,
+      triggerUpload: () => this.setState({ uploadedNotice: true }),
+      uploadedNotice: s.uploadedNotice,
+      saveInfo: () => this.setState({ infoSaved: true }),
+      infoSaved: s.infoSaved,
+      team,
+      newName: s.newName, setNewName: (e) => this.setState({ newName: e.target.value }),
+      newRole: s.newRole, setNewRole: (e) => this.setState({ newRole: e.target.value }),
+      newHandle: s.newHandle, setNewHandle: (e) => this.setState({ newHandle: e.target.value }),
+      addMember: () => {
+        if(!s.newName || !s.newRole) return;
+        this.setState({ team:[...s.team, { id:Date.now(), name:s.newName, role:s.newRole, handle:s.newHandle }], newName:'', newRole:'', newHandle:'' });
+      },
+      qaList,
+      notif: s.notif,
+      notifQBg: s.notif.q ? '#CCFF00' : '#2C3327', notifQLeft: s.notif.q ? '18px' : '2px',
+      notifBBg: s.notif.b ? '#CCFF00' : '#2C3327', notifBLeft: s.notif.b ? '18px' : '2px',
+      notifABg: s.notif.a ? '#CCFF00' : '#2C3327', notifALeft: s.notif.a ? '18px' : '2px',
+      notifRBg: s.notif.r ? '#CCFF00' : '#2C3327', notifRLeft: s.notif.r ? '18px' : '2px',
+      toggleNotif: {
+        q: () => this.setState({ notif:{...s.notif, q:!s.notif.q} }),
+        b: () => this.setState({ notif:{...s.notif, b:!s.notif.b} }),
+        a: () => this.setState({ notif:{...s.notif, a:!s.notif.a} }),
+        r: () => this.setState({ notif:{...s.notif, r:!s.notif.r} })
+      }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

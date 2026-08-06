@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&amp;display=swap" rel="stylesheet">
+<style>
+  html, body { margin:0; padding:0; background:#08090A; }
+  body { font-family:'JetBrains Mono', ui-monospace, monospace; -webkit-font-smoothing:antialiased; }
+  a { color:#CCFF00; text-decoration:none; }
+  a:hover { color:#E4FF6B; }
+  input, textarea, select { font-family:'JetBrains Mono', monospace; }
+  ::placeholder { color:#4E5747; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#08090A; color:#C4CCBB">
+  <div style="display:flex; flex-wrap:wrap; gap:8px; padding:16px clamp(14px,4vw,48px); border-bottom:1px solid #161914; align-items:center">
+    <a href="The Boardroom.dc.html" style="font:800 13px/1 'JetBrains Mono',monospace; color:#CCFF00; letter-spacing:0.12em; border-bottom:2px solid #CCFF00; padding-bottom:4px">THE BOARDROOM</a>
+    <a href="The Boardroom.dc.html" style="margin-left:16px; font:400 11px/1 'JetBrains Mono',monospace; color:#6C7563">← BACK TO LOBBY</a>
+  </div>
+
+  <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+  <div style="padding:40px clamp(14px,4vw,48px) 90px; max-width:640px">
+    <div style="font:700 9px/1 'JetBrains Mono',monospace; color:#8CA05A; letter-spacing:0.16em">SEASON 02 WAITLIST</div>
+    <div style="font:800 26px/1.2 'JetBrains Mono',monospace; color:#F2F5EF; margin-top:12px">Get your project considered</div>
+    <div style="font:400 12px/1.8 'JetBrains Mono',monospace; color:#8A9184; margin-top:12px; text-wrap:pretty">Season 01 is full. Tell us about your project and we'll reach out if there's a fit for a future season — no commitment, and we don't share this with anyone outside the review team.</div>
+
+    <div style="display:flex; flex-direction:column; gap:18px; margin-top:30px">
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">PROJECT NAME</label><input value="{{ f.name }}" onChange="{{ set.name }}" type="text" placeholder="What should we call it?" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:700 12px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">ONE-LINER</label><input value="{{ f.line }}" onChange="{{ set.line }}" type="text" placeholder="What does it do, in one sentence?" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">CURRENT TRACTION</label><textarea rows="2" value="{{ f.traction }}" onChange="{{ set.traction }}" placeholder="Wallets, TVL, users, revenue — whatever's real right now" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#C4CCBB; padding:12px 14px; font:400 12px/1.6 'JetBrains Mono',monospace; resize:vertical"></textarea></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px">
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">WEBSITE</label><input value="{{ f.site }}" onChange="{{ set.site }}" type="text" placeholder="yourproject.xyz" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">PROJECT X PROFILE</label><input value="{{ f.x }}" onChange="{{ set.x }}" type="text" placeholder="@yourproject" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">FOUNDER NAME</label><input value="{{ f.founder }}" onChange="{{ set.founder }}" type="text" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">FOUNDER X (OPTIONAL — DOXX)</label><input value="{{ f.founderX }}" onChange="{{ set.founderX }}" type="text" placeholder="@handle, leave blank to stay anon" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">CONTACT EMAIL</label><input value="{{ f.email }}" onChange="{{ set.email }}" type="text" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+        <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">WALLET ADDRESS</label><input value="{{ f.wallet }}" onChange="{{ set.wallet }}" type="text" placeholder="0x…" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#F2F5EF; padding:12px 14px; font:400 12px/1 'JetBrains Mono',monospace"/></div>
+      </div>
+      <div><label style="font:700 9px/1 'JetBrains Mono',monospace; color:#6C7563; letter-spacing:0.14em">WHY THE BOARDROOM, WHY NOW</label><textarea rows="3" value="{{ f.why }}" onChange="{{ set.why }}" placeholder="What are you hoping a launch here does for you?" style="width:100%; box-sizing:border-box; margin-top:8px; border:1px solid #2C3327; background:#0E110C; color:#C4CCBB; padding:12px 14px; font:400 12px/1.6 'JetBrains Mono',monospace; resize:vertical"></textarea></div>
+
+      <div onClick="{{ submit }}" style="cursor:pointer; margin-top:8px; border:2px solid {{ submitColor }}; background:{{ submitBg }}; color:{{ submitColor }}; padding:15px 20px; font:800 11px/1 'JetBrains Mono',monospace; letter-spacing:0.12em; text-align:center">{{ submitLabel }}</div>
+      <sc-if value="{{ formError }}"><div style="font:400 10px/1.6 'JetBrains Mono',monospace; color:#F0644B">Project name, one-liner and contact email are required.</div></sc-if>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ isDone }}">
+  <div style="padding:80px clamp(14px,4vw,48px) 90px; max-width:560px; text-align:center; margin:0 auto">
+    <div style="font:800 22px/1.3 'JetBrains Mono',monospace; color:#CCFF00">YOU'RE ON THE WAITLIST</div>
+    <div style="font:400 12px/1.8 'JetBrains Mono',monospace; color:#8A9184; margin-top:14px">{{ f.name }} is in for review. If there's a fit for a future season, we'll reach out at {{ f.email }} — no need to follow up.</div>
+    <a href="The Boardroom.dc.html" style="display:inline-block; margin-top:26px; border:1px solid #2C3327; color:#8A9184; padding:12px 18px; font:700 10px/1 'JetBrains Mono',monospace; letter-spacing:0.1em">← BACK TO THE LOBBY</a>
+  </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { f:{ name:'', line:'', traction:'', site:'', x:'', founder:'', founderX:'', email:'', wallet:'', why:'' },
+    submitted:false, error:false };
+
+  renderVals(){
+    const s = this.state;
+    const set = {};
+    Object.keys(s.f).forEach(k => { set[k] = (e) => this.setState({ f:{ ...s.f, [k]: e.target.value } }); });
+    const ready = s.f.name && s.f.line && s.f.email;
+    return {
+      isForm: !s.submitted, isDone: s.submitted,
+      f: s.f, set,
+      submitLabel: 'JOIN THE WAITLIST', submitColor: '#CCFF00', submitBg:'#141A06',
+      formError: s.error,
+      submit: () => { if(!ready){ this.setState({ error:true }); return; } this.setState({ submitted:true, error:false }); }
+    };
+  }
+}
+
+</script>
+</body>
+</html>

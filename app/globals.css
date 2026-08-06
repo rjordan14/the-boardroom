@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens ported from design_handoff_the_boardroom/README.md
+ * "Design Tokens" section. Namespaced under `board-*` so they don't
+ * collide with Tailwind's own `lime`/`amber` palettes.
+ */
+@theme {
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  /* Backgrounds */
+  --color-board-bg: #08090a;
+  --color-board-bg-media: #04060a;
+  --color-board-card: #0b0e08;
+  --color-board-card-alt: #0e110c;
+  --color-board-card-success: #0c1008;
+  --color-board-card-success-alt: #0c0f07;
+  --color-board-card-amber: #12100a;
+  --color-board-card-amber-alt: #14100a;
+  --color-board-card-error: #170d0a;
+
+  /* Accents */
+  --color-board-lime: #ccff00;
+  --color-board-lime-hover: #e4ff6b;
+  --color-board-amber: #e5b531;
+  --color-board-success: #4ade80;
+  --color-board-error: #f0644b;
+
+  /* Text */
+  --color-board-heading: #f2f5ef;
+  --color-board-heading-alt: #e3edd2;
+  --color-board-body: #c4ccbb;
+  --color-board-secondary: #8a9184;
+  --color-board-secondary-alt: #8ca05a;
+  --color-board-tertiary: #6c7563;
+  --color-board-disabled: #4e5747;
+
+  /* Borders */
+  --color-board-border: #2c3327;
+  --color-board-border-alt: #23271f;
+  --color-board-border-voting: #3d4a2b;
+  --color-board-border-amber: #5a4a1e;
+  --color-board-border-amber-alt: #3a2e14;
+  --color-board-border-error: #5a2a20;
+  --color-board-border-error-alt: #3a1c16;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-board-bg);
+}
+
+body {
+  color: var(--color-board-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  image-rendering: pixelated;
+}
+
+::placeholder {
+  color: var(--color-board-disabled);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes board-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes board-tick-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.65;
+  }
+}
+
+@keyframes board-floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes board-flicker {
+  0%,
+  92%,
+  100% {
+    opacity: 0.55;
+  }
+  93% {
+    opacity: 0.15;
+  }
+  95% {
+    opacity: 0.7;
+  }
+  97% {
+    opacity: 0.25;
+  }
+}
+
+@keyframes board-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(320%);
+  }
+}
+
+@keyframes board-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes board-glow {
+  0%,
+  100% {
+    text-shadow: 0 0 0 rgba(204, 255, 0, 0);
+  }
+  50% {
+    text-shadow: 0 0 34px rgba(204, 255, 0, 0.55);
+  }
+}
+
+@keyframes board-slamin {
+  0% {
+    transform: scale(1.22) translateY(-10px);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
