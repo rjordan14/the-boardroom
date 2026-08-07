@@ -191,7 +191,7 @@ function SFPlaceholder({
         className={`flex items-center gap-2.5 border border-board-lime bg-[#12160E] px-3.5 py-3 ${
           reverse ? "flex-row-reverse text-right" : ""
         }`}
-        style={{ animation: "board-stampin 500ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+        style={{ animation: "board-stampin-flat 500ms cubic-bezier(0.3,1.4,0.5,1) both" }}
       >
         <img src={winner.mark} alt="" className="h-6 w-6 flex-none" />
         <div className="min-w-0">
