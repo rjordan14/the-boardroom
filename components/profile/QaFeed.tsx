@@ -111,8 +111,9 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
                 }
                 toggleQaUpvote(item.id);
               }}
-              className="relative flex w-11 flex-none flex-col items-center gap-1 pt-0.5 transition hover:text-board-lime"
-              style={{ color: qaUpvotes[item.id] ? "#CCFF00" : "#C4CCBB" }}
+              className={`relative flex w-11 flex-none flex-col items-center gap-1 pt-0.5 transition hover:-translate-y-0.5 hover:text-board-lime ${
+                qaUpvotes[item.id] ? "text-board-lime" : "text-[#C4CCBB]"
+              }`}
             >
               {sparkingId === item.id && <SparkBurst />}
               <span className="font-mono text-[13px] font-extrabold">▲</span>
