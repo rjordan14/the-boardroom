@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MatchupRow } from "./MatchupRow";
+import { useBoardroomStore } from "@/store/useBoardroomStore";
 import type { Project, Room } from "@/lib/types";
 
 const projectA: Project = {
@@ -33,6 +34,17 @@ function makeRoom(status: Room["status"]): Room {
   };
 }
 
+// The store is a module singleton — reset the per-wallet slices this
+// component reads so state from one test can't leak into the next.
+beforeEach(() => {
+  useBoardroomStore.setState({
+    watchProgress: {},
+    watchStartedAt: {},
+    ballotChoice: {},
+    ballotSealedAt: {},
+  });
+});
+
 describe("MatchupRow", () => {
   it("renders a VoteCta linking to /room/[id] for an open room", () => {
     render(<MatchupRow room={makeRoom("open")} projectA={projectA} projectB={projectB} />);
@@ -45,7 +57,7 @@ describe("MatchupRow", () => {
     expect(screen.queryByText("VIEW RESULT →")).not.toBeInTheDocument();
   });
 
-  it("renders a ResultCta linking to /room/[id]/result for a closed room", () => {
+  it("renders a ResultCta linking to /room/[id]/result for a closed room with no ballot, and no progress sub-panel", () => {
     render(<MatchupRow room={makeRoom("closed")} projectA={projectA} projectB={projectB} />);
     const results = screen.getAllByText("VIEW RESULT →");
     expect(results.length).toBeGreaterThan(0);
@@ -54,6 +66,7 @@ describe("MatchupRow", () => {
       expect(link).toHaveAttribute("href", "/room/01/result");
     }
     expect(screen.queryByText("CLOCK IN TO VOTE")).not.toBeInTheDocument();
+    expect(screen.queryByText("BALLOT UNLOCKS AFTER BOTH PITCHES")).not.toBeInTheDocument();
   });
 
   it("links each project name to its profile", () => {
@@ -62,5 +75,46 @@ describe("MatchupRow", () => {
     for (const link of ledgerboyLinks) {
       expect(link).toHaveAttribute("href", "/profile/A");
     }
+  });
+
+  it("shows the not-started progress sub-panel with 0% bars when an open room has no watch activity yet", () => {
+    render(<MatchupRow room={makeRoom("open")} projectA={projectA} projectB={projectB} />);
+    expect(screen.getAllByText("BALLOT UNLOCKS AFTER BOTH PITCHES").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("0 OF 2 WATCHED").length).toBeGreaterThan(0);
+  });
+
+  it("shows the watching state once progress exists, with the CTA still linking into the room", () => {
+    useBoardroomStore.getState().setWatchProgress("01", "pA", 40);
+    render(<MatchupRow room={makeRoom("open")} projectA={projectA} projectB={projectB} />);
+    expect(screen.getAllByText(/WATCHING NOW/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/PITCH A PLAYING/).length).toBeGreaterThan(0);
+    const votes = screen.getAllByText("CLOCK IN TO VOTE");
+    for (const el of votes) {
+      expect(el.closest("a")).toHaveAttribute("href", "/room/01");
+    }
+  });
+
+  it("shows a compare CTA once both pitches are fully watched but no ballot is cast yet", () => {
+    useBoardroomStore.getState().setWatchProgress("01", "pA", 100);
+    useBoardroomStore.getState().setWatchProgress("01", "pB", 100);
+    render(<MatchupRow room={makeRoom("open")} projectA={projectA} projectB={projectB} />);
+    expect(screen.getAllByText(/BOTH PITCHES WATCHED/).length).toBeGreaterThan(0);
+    const compare = screen.getAllByText("COMPARE & VOTE");
+    expect(compare.length).toBeGreaterThan(0);
+    for (const el of compare) {
+      expect(el.closest("a")).toHaveAttribute("href", "/room/01/compare");
+    }
+  });
+
+  it("shows the sealed-ballot receipt and a review CTA once a wallet has voted, even in a closed room", () => {
+    useBoardroomStore.getState().setBallotChoice("01", "A");
+    render(<MatchupRow room={makeRoom("closed")} projectA={projectA} projectB={projectB} />);
+    expect(screen.getAllByText("✓ YOU VOTED · BALLOT SEALED").length).toBeGreaterThan(0);
+    const review = screen.getAllByText("VIEW MY BALLOT →");
+    expect(review.length).toBeGreaterThan(0);
+    for (const el of review) {
+      expect(el.closest("a")).toHaveAttribute("href", "/my-activity");
+    }
+    expect(screen.queryByText("VIEW RESULT →")).not.toBeInTheDocument();
   });
 });

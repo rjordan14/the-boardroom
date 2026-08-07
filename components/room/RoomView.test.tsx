@@ -88,9 +88,10 @@ describe("RoomView", () => {
     vi.useFakeTimers();
     render(<RoomView room={room} projectA={projectA} projectB={projectB} />);
 
-    // door phase holds for 1200ms before playback starts
+    // door phase holds for 3820ms before playback starts — matches the
+    // door+walker sequence's own timing (1320ms delay + 2500ms walk).
     act(() => {
-      vi.advanceTimersByTime(1200);
+      vi.advanceTimersByTime(3820);
     });
     // Exact text, not a substring regex — the door chip's lingering exit
     // animation ("NOW ENTERING · LEDGERBOY") also contains "ENTERING" as

@@ -31,10 +31,10 @@ export function ResultView({
           <motion.img
             src={winner.mark}
             alt=""
-            initial={{ scale: 0.4, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, ease: [0.2, 1.6, 0.4, 1] }}
-            className="h-14 w-14"
+            initial={{ scale: 0.4, opacity: 0, y: 0 }}
+            animate={{ scale: 1, opacity: 1, y: [0, 0, -10, 0] }}
+            transition={{ duration: 0.9, times: [0, 0.55, 0.78, 1], ease: [0.2, 1.6, 0.4, 1] }}
+            className="h-14 w-14 animate-[board-floaty_3.2s_ease-in-out_1.1s_infinite]"
           />
           <motion.div
             initial={{ opacity: 0, y: -8 }}

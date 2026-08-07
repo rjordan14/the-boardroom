@@ -41,6 +41,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local reference material, not app source
+/demo_video
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -31,6 +31,12 @@ interface BoardroomState {
   watchProgress: Record<string, WatchProgress>;
   setWatchProgress: (roomId: string, key: "pA" | "pB", value: number) => void;
 
+  /** Keyed by roomId — wall-clock time this wallet first started
+   *  watching, for the Lobby's "WATCHING NOW · IN {time}" display
+   *  (matches the design handoff's TIME CARD, which shows real
+   *  clock-in/out times rather than elapsed playback duration). */
+  watchStartedAt: Record<string, number>;
+
   floorUpvotes: Record<string, boolean>;
   toggleFloorUpvote: (questionId: string) => void;
 
@@ -41,6 +47,10 @@ interface BoardroomState {
   /** Keyed by roomId — which project a wallet sealed its ballot for. */
   ballotChoice: Record<string, string>;
   setBallotChoice: (roomId: string, projectKey: string) => void;
+
+  /** Keyed by roomId — wall-clock time the ballot was sealed, for the
+   *  Lobby's TIME CARD "OUT" timestamp. */
+  ballotSealedAt: Record<string, number>;
 
   /** Keyed by roomId — optional backing escrow chosen on the Sealed screen. */
   backing: Record<string, { amount: number; escrowed: boolean }>;
@@ -66,7 +76,12 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
         ...state.watchProgress,
         [roomId]: { ...(state.watchProgress[roomId] ?? EMPTY_PROGRESS), [key]: value },
       },
+      watchStartedAt: state.watchStartedAt[roomId]
+        ? state.watchStartedAt
+        : { ...state.watchStartedAt, [roomId]: Date.now() },
     })),
+
+  watchStartedAt: {},
 
   floorUpvotes: {},
   toggleFloorUpvote: (questionId) =>
@@ -83,7 +98,12 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
 
   ballotChoice: {},
   setBallotChoice: (roomId, projectKey) =>
-    set((state) => ({ ballotChoice: { ...state.ballotChoice, [roomId]: projectKey } })),
+    set((state) => ({
+      ballotChoice: { ...state.ballotChoice, [roomId]: projectKey },
+      ballotSealedAt: { ...state.ballotSealedAt, [roomId]: Date.now() },
+    })),
+
+  ballotSealedAt: {},
 
   backing: {},
   setBackingAmount: (roomId, amount) =>

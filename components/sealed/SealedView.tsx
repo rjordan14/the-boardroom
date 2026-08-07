@@ -7,6 +7,7 @@ import type { Project, Room } from "@/lib/types";
 import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { useEscrowBacking } from "@/lib/chain/hooks";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
+import { CelebrationBanner } from "./CelebrationBanner";
 
 /** Season-1 backing minimum per README Decisions Locked #7 (888
  *  $STONKBROKER) — the prototype's own backing panel showed a stale
@@ -30,6 +31,20 @@ export function SealedView({
   const setBackingEscrowed = useBoardroomStore((s) => s.setBackingEscrowed);
   const { phase, escrow, reclaim } = useEscrowBacking(room.id);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/room/${room.id}/sealed`
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      // Clipboard access can be denied by the browser — no fallback
+      // worth building for a "nice to have" share affordance.
+    }
+  };
 
   const amount = backingState?.amount ?? BACKING_PRESET_MID;
   const escrowed = backingState?.escrowed ?? false;
@@ -47,7 +62,10 @@ export function SealedView({
   };
 
   return (
-    <div className="flex flex-col items-center gap-8 px-[clamp(14px,4vw,48px)] pb-16 pt-12">
+    <div className="flex flex-col items-center gap-8 pb-16">
+      <CelebrationBanner />
+
+      <div className="flex w-full flex-col items-center gap-8 px-[clamp(14px,4vw,48px)]">
       <div className="text-center">
         <div className="font-mono text-[clamp(24px,4.4vw,40px)] font-extrabold leading-[1.15] text-board-heading">
           YOUR VOTE IS CLOCKED IN
@@ -92,14 +110,18 @@ export function SealedView({
             </div>
             <div className="font-mono text-[18px] font-extrabold">{chosenProject.name}</div>
           </div>
-          <div className="ml-auto border-2 border-[#B4453A] px-3 py-2 font-mono text-[11px] font-extrabold tracking-[0.1em] text-[#B4453A]">
+          <div
+            className="ml-auto border-2 border-[#B4453A] px-3 py-2 font-mono text-[11px] font-extrabold tracking-[0.1em] text-[#B4453A]"
+            style={{ animation: "board-stampin 600ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+          >
             SEALED
           </div>
         </div>
       </div>
 
-      <div className="w-full max-w-[1304px] border border-board-border-amber bg-board-card-amber">
-        <div className="flex items-center gap-3 border-b border-[#2E2814] px-5.5 py-3.5">
+      <div className="w-full max-w-[1304px] animate-[board-gold-glow_3.4s_ease-in-out_infinite] border border-board-border-amber bg-board-card-amber">
+        <div className="relative flex items-center gap-3 overflow-hidden border-b border-[#2E2814] px-5.5 py-3.5">
+          <span className="pointer-events-none absolute inset-y-0 left-0 w-1/3 -skew-x-12 animate-[board-sheen_5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-board-amber/15 to-transparent" />
           <span className="block h-2.5 w-2.5 animate-[board-pulse_2.6s_ease-in-out_infinite] bg-board-amber" />
           <span className="font-mono text-[12px] font-extrabold tracking-[0.12em] text-board-amber">
             OPTIONAL · BACK YOUR CONVICTION
@@ -121,6 +143,25 @@ export function SealedView({
                 complete their launch, you claim their token at the same
                 fixed rate as everyone else. Any other outcome, you take it
                 all back.
+              </div>
+
+              <div className="mt-5 flex max-w-[560px] gap-2.5">
+                <div className="flex-1 border border-[#2B4A33] bg-[#0B140E] p-3">
+                  <div className="font-mono text-[9px] font-extrabold tracking-[0.12em] text-board-success">
+                    FULLY REFUNDABLE
+                  </div>
+                  <div className="mt-1.5 font-mono text-[10px] leading-[1.6] text-[#8FA894]">
+                    If they lose, don&apos;t launch, or the round is voided.
+                  </div>
+                </div>
+                <div className="flex-1 border border-board-border-amber bg-[#151109] p-3">
+                  <div className="font-mono text-[9px] font-extrabold tracking-[0.12em] text-board-amber">
+                    SAME RATE FOR EVERYONE
+                  </div>
+                  <div className="mt-1.5 font-mono text-[10px] leading-[1.6] text-[#C4B893]">
+                    No early-bird bonus, no whale discount, no queue.
+                  </div>
+                </div>
               </div>
 
               <button
@@ -242,6 +283,19 @@ export function SealedView({
           NEXT ROOM →
         </Link>
         <Link
+          href="/my-activity"
+          className="whitespace-nowrap border border-[#3D4536] px-6 py-4 font-mono text-[12px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
+        >
+          VIEW MY BALLOT
+        </Link>
+        <button
+          type="button"
+          onClick={handleShare}
+          className="whitespace-nowrap border border-[#3D4536] px-6 py-4 font-mono text-[12px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
+        >
+          {copied ? "LINK COPIED ✓" : "SHARE CARD ↗"}
+        </button>
+        <Link
           href="/"
           className="whitespace-nowrap border border-[#3D4536] px-6 py-4 font-mono text-[12px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
         >
@@ -259,6 +313,7 @@ export function SealedView({
           finalized — the result is published and the winner advances.
           Eliminated projects keep their profile, pitch and feedback.
         </div>
+      </div>
       </div>
     </div>
   );

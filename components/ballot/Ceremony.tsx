@@ -58,20 +58,21 @@ export function Ceremony({
         )}
 
         {(phase === "pending" || phase === "confirmed") && (
+          // Card/stage wrapper — MOTION.md "Vote ceremony": shake 420ms
+          // 340ms cubic-bezier(0.36,0.07,0.19,0.97) both. Fires once on
+          // mount (entering "pending"); doesn't replay on the later
+          // pending→confirmed transition since this block isn't remounted.
           <motion.div
             key="stamp"
-            initial={{ x: 0 }}
-            animate={
-              phase === "pending"
-                ? { x: [0, -9, 8, -5, 4, 0], y: [0, 4, -3, 2, -1, 0] }
-                : { y: 0 }
-            }
-            transition={{ duration: 0.42 }}
+            initial={{ x: 0, y: 0 }}
+            animate={{ x: [0, -9, 8, -5, 4, 0], y: [0, 4, -3, 2, -1, 0] }}
+            transition={{ duration: 0.42, delay: 0.34, times: [0, 0.2, 0.4, 0.6, 0.8, 1] }}
             className="relative"
           >
             <motion.div
               initial={{ opacity: 1 }}
               animate={ejecting ? { y: -8, opacity: 1 } : { opacity: 1 }}
+              transition={ejecting ? { duration: 0.62, ease: [0.2, 0.9, 0.3, 1] } : undefined}
               className="flex w-full max-w-[340px] flex-col items-center gap-4 bg-[#E8E4D4] px-6 py-5.5 text-[#15170F] shadow-[0_6px_0_#9A9784]"
             >
               <div className="flex w-full justify-between font-mono text-[9px] font-bold tracking-[0.14em] text-[#6A6752]">
@@ -87,14 +88,26 @@ export function Ceremony({
                   fixed offset there collided with card content once this
                   card carried more than the prototype's original two
                   lines. */}
-              <motion.div
-                initial={{ opacity: 0, scale: 2.4, rotate: -7 }}
-                animate={{ opacity: 1, scale: 1, rotate: -7 }}
-                transition={{ duration: 0.38, ease: [0.3, 1.5, 0.5, 1] }}
-                className="w-[156px] border-[5px] border-[#B4453A] py-3 text-center font-mono text-[20px] font-extrabold tracking-[0.1em] text-[#B4453A]"
-              >
-                SEALED
-              </motion.div>
+              <div className="relative">
+                {/* Ink rings 1 & 2 — inkRing 700ms 340ms/460ms ease-out
+                    both. Unconditional (not gated on `ejecting`): they
+                    fire once at t=0 alongside the shake/stamp, not on the
+                    later eject beat. */}
+                <span
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-[70px] w-[70px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#B4453A] [animation:board-ink-ring_700ms_340ms_ease-out_both]"
+                />
+                <span
+                  className="pointer-events-none absolute left-1/2 top-1/2 h-[70px] w-[70px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-[#B4453A] [animation:board-ink-ring_700ms_460ms_ease-out_both]"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 3.2, rotate: -7 }}
+                  animate={{ opacity: [0, 1, 1], scale: [3.2, 0.9, 1], rotate: -7 }}
+                  transition={{ duration: 0.38, delay: 0.34, times: [0, 0.55, 1], ease: [0.3, 1.5, 0.5, 1] }}
+                  className="w-[156px] border-[5px] border-[#B4453A] py-3 text-center font-mono text-[20px] font-extrabold tracking-[0.1em] text-[#B4453A]"
+                >
+                  SEALED
+                </motion.div>
+              </div>
             </motion.div>
           </motion.div>
         )}

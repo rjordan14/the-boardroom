@@ -7,7 +7,9 @@ import { Hero } from "@/components/lobby/Hero";
 import { ExplainerSteps } from "@/components/lobby/ExplainerSteps";
 import { CountdownPanel } from "@/components/lobby/CountdownPanel";
 import { VotingBackingExplainer } from "@/components/lobby/VotingBackingExplainer";
+import { ActivityTicker } from "@/components/lobby/ActivityTicker";
 import { EliminatedStrip } from "@/components/lobby/EliminatedStrip";
+import { YourRoundStrip } from "@/components/lobby/YourRoundStrip";
 import { MatchupRow } from "@/components/lobby/MatchupRow";
 import { Bracket } from "@/components/lobby/Bracket";
 import { FloorPreview } from "@/components/lobby/FloorPreview";
@@ -43,12 +45,18 @@ export default async function LobbyPage() {
           <VotingBackingExplainer />
         </div>
 
+        <ActivityTicker />
+
         <div className="px-[clamp(14px,4vw,48px)] pt-12">
           <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
             TODAY&apos;S MATCHUPS
           </div>
           <div className="font-mono text-[12px] text-[#7C8474]">
             Clock in, watch, vote. No gatekeepers.
+          </div>
+
+          <div className="mt-4">
+            <YourRoundStrip rooms={rooms} />
           </div>
 
           <div className="mt-4 border border-board-border bg-board-card-alt">
@@ -69,11 +77,26 @@ export default async function LobbyPage() {
         </div>
 
         <div className="px-[clamp(14px,4vw,48px)] pt-8">
+          <div className="flex gap-3.5 border border-board-border-amber bg-board-card-amber p-4">
+            <div className="flex-none font-mono text-[11px] font-extrabold leading-[1.6] tracking-[0.1em] text-board-amber">
+              NOTICE
+            </div>
+            <div className="font-mono text-[11px] leading-[1.7] text-[#9A8E6E]">
+              No project in The Boardroom has a token, and no contract addresses exist for
+              them during the tournament. Any address claiming otherwise is fake. Voting is
+              free and equal — $STONKBROKER holdings never add voting power. Backing is a
+              separate, optional escrow: it moves no votes, and it is fully reclaimable
+              unless the project wins and completes its launch.
+            </div>
+          </div>
+        </div>
+
+        <div className="px-[clamp(14px,4vw,48px)] pt-8">
           <FloorPreview questions={floorQuestions} projects={projects} />
         </div>
 
         <div className="mt-8 flex flex-wrap justify-between gap-2 border-t border-[#161914] px-[clamp(14px,4vw,48px)] py-5 font-mono text-[11px] tracking-[0.08em] text-[#4A5540]">
-          <div>THEBOARDROOM.XYZ · ROBINHOOD CHAIN MAINNET</div>
+          <div>STONKBROKERS.CASH · ROBINHOOD CHAIN MAINNET</div>
           <Link href="/apply" className="transition hover:text-board-lime">
             APPLY FOR SEASON 02 →
           </Link>

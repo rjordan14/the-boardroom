@@ -7,8 +7,10 @@ export function Hero() {
         className="absolute inset-x-0 top-0 block w-full"
       />
       <div className="absolute inset-x-0 top-0 h-[12%] animate-[board-flicker_7s_infinite] bg-gradient-to-b from-board-lime to-transparent opacity-[0.06]" />
+      <div className="pointer-events-none absolute inset-0 w-1/3 -skew-x-12 animate-[board-sheen_9s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
 
       <div className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-[2.4cqw] overflow-hidden [container-type:inline-size]">
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-6 animate-[board-scan_5s_ease-in-out_infinite] bg-gradient-to-b from-board-lime/25 to-transparent" />
         <div className="max-w-full whitespace-nowrap font-mono text-[clamp(6px,1.6cqw,12px)] font-bold tracking-[0.4em] text-[#7C9A2E]">
           THE BOARDROOM · SEASON 01
         </div>
