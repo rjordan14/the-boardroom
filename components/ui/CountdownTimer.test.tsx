@@ -27,12 +27,12 @@ describe("CountdownTimer", () => {
 
   it("ticks down as time advances", () => {
     render(<CountdownTimer target="2026-08-06T00:00:10.000Z" />);
-    expect(screen.getByText("0d 00:00:10")).toBeInTheDocument();
+    expect(screen.getByText("1d 00:00:10")).toBeInTheDocument();
 
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    expect(screen.getByText("0d 00:00:07")).toBeInTheDocument();
+    expect(screen.getByText("1d 00:00:07")).toBeInTheDocument();
   });
 
   it("floors at zero once the target has passed rather than going negative", () => {

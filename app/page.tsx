@@ -66,15 +66,13 @@ export default async function LobbyPage() {
               </div>
             </div>
             {!roundComplete && roundClosesAt && (
-              <div className="flex items-center gap-2.5 border-2 border-board-lime bg-[#111607] px-4 py-2.5">
-                <span className="block h-2 w-2 animate-[board-pulse_1.5s_ease-in-out_infinite] rounded-full bg-board-lime" />
-                <div>
-                  <div className="font-mono text-[9px] font-bold tracking-[0.2em] text-board-secondary-alt">
-                    ROUND VOTING ENDS IN
-                  </div>
-                  <div className="font-mono text-[18px] font-extrabold leading-tight text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.4)]">
-                    <CountdownTimer target={roundClosesAt} />
-                  </div>
+              <div className="border-2 border-board-lime bg-[#111607] px-4 py-2.5">
+                <div className="flex items-center gap-2 font-mono text-[9px] font-bold tracking-[0.2em] text-board-secondary-alt">
+                  <span className="block h-2 w-2 animate-[board-pulse_1.5s_ease-in-out_infinite] rounded-full bg-board-lime" />
+                  ROUND VOTING ENDS IN
+                </div>
+                <div className="mt-1 font-mono text-[18px] font-extrabold leading-tight text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.4)]">
+                  <CountdownTimer target={roundClosesAt} />
                 </div>
               </div>
             )}

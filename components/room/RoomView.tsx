@@ -479,15 +479,13 @@ export function RoomView({
 
 export function RoomHeaderRight({ room }: { room: Room }) {
   return (
-    <div className="flex items-center gap-2.5 border-2 border-[#46592C] bg-[#080A05] px-3.5 py-2.5 shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
-      <span className="block h-1.5 w-1.5 animate-[board-pulse_1.6s_ease-in-out_infinite] rounded-full bg-board-lime" />
-      <div className="text-right">
-        <div className="font-mono text-[8px] font-bold tracking-[0.16em] text-board-secondary-alt">
-          VOTING CLOSES
-        </div>
-        <div className="mt-1 font-mono text-[15px] font-extrabold text-board-lime [text-shadow:0_0_12px_rgba(204,255,0,0.5)]">
-          <CountdownTimer target={room.closesAt} />
-        </div>
+    <div className="border-2 border-[#46592C] bg-[#080A05] px-3.5 py-2.5 shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
+      <div className="flex items-center justify-end gap-1.5 font-mono text-[8px] font-bold tracking-[0.16em] text-board-secondary-alt">
+        <span className="block h-1.5 w-1.5 animate-[board-pulse_1.6s_ease-in-out_infinite] rounded-full bg-board-lime" />
+        VOTING CLOSES
+      </div>
+      <div className="mt-1 text-right font-mono text-[15px] font-extrabold text-board-lime [text-shadow:0_0_12px_rgba(204,255,0,0.5)]">
+        <CountdownTimer target={room.closesAt} />
       </div>
     </div>
   );

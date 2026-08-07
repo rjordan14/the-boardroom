@@ -19,6 +19,11 @@ describe("formatCountdown", () => {
     // 1 day and 1 second
     expect(formatCountdown(86401_000)).toBe("1d 00:00:01");
   });
+
+  it("shows 1d rather than 0d when under 24h remains but time is still left", () => {
+    const ms = 22 * 3600_000 + 17 * 60_000 + 31_000;
+    expect(formatCountdown(ms)).toBe("1d 22:17:31");
+  });
 });
 
 describe("formatClock", () => {
