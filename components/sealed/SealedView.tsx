@@ -21,17 +21,29 @@ export function SealedView({
   room,
   chosenProject,
   eligibility,
+  rooms,
 }: {
   room: Room;
   chosenProject: Project;
   eligibility: EligibilitySnapshot | null;
+  rooms: Room[];
 }) {
   const backingState = useBoardroomStore((s) => s.backing[room.id]);
   const setBackingAmount = useBoardroomStore((s) => s.setBackingAmount);
   const setBackingEscrowed = useBoardroomStore((s) => s.setBackingEscrowed);
+  const ballotChoice = useBoardroomStore((s) => s.ballotChoice);
   const { phase, escrow, reclaim } = useEscrowBacking(room.id);
   const [detailOpen, setDetailOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  // Prefer an open room the wallet hasn't voted in yet, in bracket order —
+  // falls back to any other open room, then to the lobby if the whole
+  // round is voted out.
+  const nextRoom =
+    rooms
+      .filter((r) => r.id !== room.id && r.status === "open" && !ballotChoice[r.id])
+      .sort((a, b) => a.n - b.n)[0] ??
+    rooms.filter((r) => r.id !== room.id && r.status === "open").sort((a, b) => a.n - b.n)[0];
 
   const handleShare = async () => {
     try {
@@ -77,46 +89,54 @@ export function SealedView({
         </div>
       </div>
 
-      <div className="w-full max-w-[460px] bg-[#E8E4D4] p-6.5 text-[#15170F] shadow-[0_4px_0_#9A9784]">
-        <div className="flex items-baseline justify-between">
-          <div className="font-mono text-[13px] font-extrabold tracking-[0.16em]">TIME CARD</div>
-          <div className="font-mono text-[10px] text-[#6A6752]">THE BOARDROOM</div>
-        </div>
-        <div className="my-3.5 border-t-2 border-[#15170F]" />
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-x-3 gap-y-3.5 font-mono text-[11px] leading-[1.7] text-[#3A3A2C]">
-          <div>
-            <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">ROOM</div>
-            {room.id} · {room.roundLabel.toUpperCase()}
+      <div className="flex w-full max-w-[700px] items-center justify-center gap-6">
+        <div className="w-full max-w-[460px] bg-[#E8E4D4] p-6.5 text-[#15170F] shadow-[0_4px_0_#9A9784]">
+          <div className="flex items-baseline justify-between">
+            <div className="font-mono text-[13px] font-extrabold tracking-[0.16em]">TIME CARD</div>
+            <div className="font-mono text-[10px] text-[#6A6752]">THE BOARDROOM</div>
           </div>
-          <div>
-            <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">WALLET</div>
-            {eligibility?.address ?? "—"}
-          </div>
-          <div>
-            <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">WATCHED</div>
-            2 of 2 in full
-          </div>
-          <div>
-            <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">STATUS</div>
-            SEALED
-          </div>
-        </div>
-        <div className="my-4 border-t border-dashed border-[#A8A48F]" />
-        <div className="flex items-center gap-3.5">
-          <img src={chosenProject.mark} alt="" className="h-11 w-11" />
-          <div>
-            <div className="mb-1.5 font-mono text-[9px] tracking-[0.16em] text-[#6A6752]">
-              VOTE RECORDED FOR
+          <div className="my-3.5 border-t-2 border-[#15170F]" />
+          <div className="grid grid-cols-[repeat(auto-fit,minmax(140px,1fr))] gap-x-3 gap-y-3.5 font-mono text-[11px] leading-[1.7] text-[#3A3A2C]">
+            <div>
+              <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">ROOM</div>
+              {room.id} · {room.roundLabel.toUpperCase()}
             </div>
-            <div className="font-mono text-[18px] font-extrabold">{chosenProject.name}</div>
+            <div>
+              <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">WALLET</div>
+              {eligibility?.address ?? "—"}
+            </div>
+            <div>
+              <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">WATCHED</div>
+              2 of 2 in full
+            </div>
+            <div>
+              <div className="text-[9px] tracking-[0.16em] text-[#6A6752]">STATUS</div>
+              SEALED
+            </div>
           </div>
-          <div
-            className="ml-auto border-2 border-[#B4453A] px-3 py-2 font-mono text-[11px] font-extrabold tracking-[0.1em] text-[#B4453A]"
-            style={{ animation: "board-stampin 600ms cubic-bezier(0.3,1.4,0.5,1) both" }}
-          >
-            SEALED
+          <div className="my-4 border-t border-dashed border-[#A8A48F]" />
+          <div className="flex items-center gap-3.5">
+            <img src={chosenProject.mark} alt="" className="h-11 w-11" />
+            <div>
+              <div className="mb-1.5 font-mono text-[9px] tracking-[0.16em] text-[#6A6752]">
+                VOTE RECORDED FOR
+              </div>
+              <div className="font-mono text-[18px] font-extrabold">{chosenProject.name}</div>
+            </div>
+            <div
+              className="ml-auto border-2 border-[#B4453A] px-3 py-2 font-mono text-[11px] font-extrabold tracking-[0.1em] text-[#B4453A]"
+              style={{ animation: "board-stampin 600ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+            >
+              SEALED
+            </div>
           </div>
         </div>
+
+        <img
+          src="/marks/catbroker-swing.gif"
+          alt=""
+          className="hidden h-[190px] w-[190px] flex-none sm:block"
+        />
       </div>
 
       <div className="w-full max-w-[1304px] animate-[board-gold-glow_3.4s_ease-in-out_infinite] border border-board-border-amber bg-board-card-amber">
@@ -277,10 +297,10 @@ export function SealedView({
 
       <div className="flex flex-wrap gap-2.5">
         <Link
-          href="/"
+          href={nextRoom ? `/room/${nextRoom.id}` : "/"}
           className="whitespace-nowrap bg-board-lime px-7 py-4 font-mono text-[12px] font-extrabold tracking-[0.12em] text-board-bg transition hover:bg-board-lime-hover"
         >
-          NEXT ROOM →
+          {nextRoom ? `NEXT ROOM · ${nextRoom.id} →` : "BACK TO LOBBY →"}
         </Link>
         <Link
           href="/my-activity"

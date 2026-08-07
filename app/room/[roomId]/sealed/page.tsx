@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getRoom } from "@/lib/api/rooms";
+import { getRoom, listRooms } from "@/lib/api/rooms";
 import { getProject } from "@/lib/api/projects";
 import { Header, BackLink } from "@/components/ui/Header";
 import { SealedGate } from "@/components/sealed/SealedGate";
@@ -10,7 +10,7 @@ export default async function SealedPage({
   params: Promise<{ roomId: string }>;
 }) {
   const { roomId } = await params;
-  const room = await getRoom(roomId);
+  const [room, rooms] = await Promise.all([getRoom(roomId), listRooms()]);
   if (!room) notFound();
 
   const [projectA, projectB] = await Promise.all([
@@ -31,7 +31,7 @@ export default async function SealedPage({
           </>
         }
       />
-      <SealedGate room={room} projectA={projectA} projectB={projectB} />
+      <SealedGate room={room} projectA={projectA} projectB={projectB} rooms={rooms} />
     </div>
   );
 }

@@ -50,7 +50,7 @@ export function ApplyForm() {
     return (
       <div className="mx-auto max-w-[560px] px-[clamp(14px,4vw,48px)] py-20 text-center">
         <div className="font-mono text-[22px] font-extrabold text-board-lime">
-          YOU&apos;RE ON THE WAITLIST
+          APPLICATION SUBMITTED
         </div>
         <div className="mt-3.5 font-mono text-[12px] leading-[1.8] text-board-secondary">
           {f.name} is in for review. If there&apos;s a fit for a future season, we&apos;ll reach
@@ -69,7 +69,7 @@ export function ApplyForm() {
   return (
     <div className="max-w-[1180px] px-[clamp(14px,4vw,48px)] py-10">
       <div className="font-mono text-[9px] font-bold tracking-[0.16em] text-board-secondary-alt">
-        SEASON 02 WAITLIST
+        SEASON 02 APPLICATIONS
       </div>
       <div className="mt-3 font-mono text-[26px] font-extrabold leading-[1.2] text-board-heading">
         Get your project considered
@@ -118,7 +118,7 @@ export function ApplyForm() {
             onClick={submit}
             className="mt-2 border-2 border-board-lime bg-[#141A06] py-4 text-center font-mono text-[11px] font-extrabold tracking-[0.12em] text-board-lime transition hover:bg-[#1A2208]"
           >
-            JOIN THE WAITLIST
+            SUBMIT APPLICATION
           </button>
           {error && (
             <div className="font-mono text-[10px] leading-[1.6] text-board-error">

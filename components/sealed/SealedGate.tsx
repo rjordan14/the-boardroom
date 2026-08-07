@@ -15,10 +15,12 @@ export function SealedGate({
   room,
   projectA,
   projectB,
+  rooms,
 }: {
   room: Room;
   projectA: Project;
   projectB: Project;
+  rooms: Room[];
 }) {
   const choice = useBoardroomStore((s) => s.ballotChoice[room.id]);
   const { data: eligibility } = useEligibility();
@@ -44,5 +46,5 @@ export function SealedGate({
     );
   }
 
-  return <SealedView room={room} chosenProject={chosenProject} eligibility={eligibility} />;
+  return <SealedView room={room} chosenProject={chosenProject} eligibility={eligibility} rooms={rooms} />;
 }
