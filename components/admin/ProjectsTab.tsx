@@ -76,7 +76,7 @@ export function ProjectsTab({
 
       <div className="mt-5.5 border border-board-border-alt bg-board-card-alt">
         <div
-          className="grid gap-2.5 border-b border-board-border-alt px-4.5 py-3 font-mono text-[9px] font-bold tracking-[0.12em] text-board-tertiary"
+          className="hidden gap-2.5 border-b border-board-border-alt px-4.5 py-3 font-mono text-[9px] font-bold tracking-[0.12em] text-board-tertiary sm:grid"
           style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr" }}
         >
           <div>PROJECT</div>
@@ -89,7 +89,7 @@ export function ProjectsTab({
           return (
             <div
               key={p.key}
-              className="grid items-center gap-2.5 border-b border-[#1A1E16] px-4.5 py-3.5 font-mono text-[11px] transition last:border-b-0 hover:bg-[#12160D]"
+              className="flex flex-col gap-2.5 border-b border-[#1A1E16] px-4.5 py-3.5 font-mono text-[11px] transition last:border-b-0 hover:bg-[#12160D] sm:grid sm:items-center"
               style={{ gridTemplateColumns: "1.6fr 1fr 1fr 1fr" }}
             >
               <div className="flex items-center gap-3">
@@ -99,20 +99,27 @@ export function ProjectsTab({
                   <div className="mt-0.5 font-mono text-[10px] text-board-tertiary">{m.founder}</div>
                 </div>
               </div>
-              <div
-                className="font-mono text-[10px] font-bold tracking-[0.08em]"
-                style={{ color: m.status === "APPROVED" ? "#4ADE80" : "#E5B531" }}
-              >
-                {m.status}
+              {/* sm:contents drops this grouping div from the box model at
+                  the sm+ breakpoint so its children re-join the 4-column
+                  grid above — below sm it's a normal row grouping status,
+                  assets and the view link under the project row instead
+                  of three disconnected grid cells with no visible header. */}
+              <div className="flex items-center justify-between gap-3 pl-11.5 sm:contents sm:pl-0">
+                <div
+                  className="font-mono text-[10px] font-bold tracking-[0.08em]"
+                  style={{ color: m.status === "APPROVED" ? "#4ADE80" : "#E5B531" }}
+                >
+                  {m.status}
+                </div>
+                <div className="text-board-secondary">{m.assetsDone} / 6</div>
+                <button
+                  type="button"
+                  onClick={() => openDetail(p.key)}
+                  className="font-mono text-[10px] font-bold tracking-[0.08em] text-board-lime sm:justify-self-start"
+                >
+                  VIEW →
+                </button>
               </div>
-              <div className="text-board-secondary">{m.assetsDone} / 6</div>
-              <button
-                type="button"
-                onClick={() => openDetail(p.key)}
-                className="justify-self-start font-mono text-[10px] font-bold tracking-[0.08em] text-board-lime"
-              >
-                VIEW →
-              </button>
             </div>
           );
         })}

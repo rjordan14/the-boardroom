@@ -9,6 +9,8 @@ import { ProgressBar } from "@/components/ui/ProgressBar";
 import { formatClock } from "@/lib/utils/format";
 import { getRoomProgress, useBoardroomStore } from "@/store/useBoardroomStore";
 import { AudienceRow } from "@/components/lobby/AudienceRow";
+import { VsMark } from "@/components/ui/VsMark";
+import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 
 /**
  * Progress advances over a fixed, fast simulated duration regardless of
@@ -116,6 +118,11 @@ export function RoomView({
   };
 
   const elapsedSeconds = (pct / 100) * project.pitchSeconds;
+  const remainingSeconds = Math.max(0, project.pitchSeconds - elapsedSeconds);
+  const remainingPct = project.pitchSeconds > 0 ? (remainingSeconds / project.pitchSeconds) * 100 : 0;
+  // Last fifth of the pitch — clock shifts to red and pulses faster as
+  // a plain "wrap it up" cue, not tied to any real enforcement.
+  const clockUrgent = remainingPct <= 20 && remainingSeconds > 0;
 
   const advanceLabel = useMemo(() => {
     if (bothWatched) return "COMPARE & VOTE →";
@@ -124,6 +131,7 @@ export function RoomView({
 
   return (
     <div>
+      <RoundCloseEffect target={room.closesAt} />
       <div className="relative h-[min(560px,50vw)] min-h-[320px] overflow-hidden bg-board-bg-media">
         {/* This wrapper is sized to the image's true aspect ratio (the
             outer frame is shorter and clips it via top offset below) —
@@ -134,7 +142,10 @@ export function RoomView({
           <AudienceRow />
         </div>
 
-        <div className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-1.5 overflow-hidden bg-black pb-9 sm:gap-3 sm:pb-0">
+        <div
+          className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-1.5 overflow-hidden bg-black pb-9 sm:gap-3 sm:pb-0"
+          style={{ perspective: "800px" }}
+        >
           {/* pb-9 (sm:pb-0) reserves room for the absolutely-positioned
               progress overlay below — without it, centered content and
               the overlay collide at short frame heights (narrow
@@ -142,17 +153,23 @@ export function RoomView({
               subtitle drops out entirely below sm: there isn't room for
               three lines of text plus the mark in that case. */}
           {phase !== "door" && (
-            <div
-              key={`live-${current}`}
-              className="flex flex-col items-center gap-1.5 text-center sm:gap-3"
-              style={{ animation: "board-poweron 1000ms cubic-bezier(0.2,0,0.2,1) both" }}
-            >
-              <img src={project.mark} alt="" className="h-8 w-8 sm:h-14 sm:w-14" />
-              <div className="max-w-full font-mono text-[clamp(15px,3.4vw,30px)] font-extrabold leading-[1.05] text-board-heading">
-                {project.name}
-              </div>
-              <div className="hidden max-w-full font-mono text-[clamp(9px,1.3vw,12px)] text-[#7C8474] sm:block">
-                {project.line}
+            // Two nested elements, not one: the flip (rotateY) and the
+            // power-on (scaleY/brightness) both animate `transform`, and
+            // two animations driving the same property on one element
+            // don't compose — CSS just picks one. Each gets its own layer.
+            <div key={`flip-${current}`} style={{ animation: "board-card-flip 480ms ease-out both" }}>
+              <div
+                key={`live-${current}`}
+                className="flex flex-col items-center gap-1.5 text-center sm:gap-3"
+                style={{ animation: "board-poweron 1000ms cubic-bezier(0.2,0,0.2,1) both" }}
+              >
+                <img src={project.mark} alt="" className="h-8 w-8 sm:h-14 sm:w-14" />
+                <div className="max-w-full font-mono text-[clamp(15px,3.4vw,30px)] font-extrabold leading-[1.05] text-board-heading">
+                  {project.name}
+                </div>
+                <div className="hidden max-w-full font-mono text-[clamp(9px,1.3vw,12px)] text-[#7C8474] sm:block">
+                  {project.line}
+                </div>
               </div>
             </div>
           )}
@@ -243,7 +260,7 @@ export function RoomView({
               </div>
 
               <div
-                className="absolute text-center font-mono text-[8px] font-bold tracking-[0.14em] text-board-lime"
+                className="absolute animate-[board-flicker_2.6s_infinite] text-center font-mono text-[8px] font-bold tracking-[0.14em] text-board-lime"
                 style={{ left: "9.6%", top: "24.2%", width: "9.6%" }}
               >
                 IN SESSION
@@ -316,15 +333,39 @@ export function RoomView({
           )}
         </AnimatePresence>
 
-        <div className="absolute right-6 top-6 z-[6] border-2 border-[#46592C] bg-[#080A05] px-4 py-3 text-center shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
-          <div className="mb-2 flex items-center justify-center gap-1.5 font-mono text-[8px] font-bold tracking-[0.26em] text-board-secondary-alt">
-            <span className="block h-1.5 w-1.5 animate-[board-pulse_1.1s_ease-in-out_infinite] rounded-full bg-board-lime" />
+        <div
+          className="absolute right-2 top-2 z-[6] w-[92px] border-2 px-2.5 py-2 text-center shadow-[0_6px_22px_rgba(0,0,0,0.7)] transition-colors duration-500 sm:right-6 sm:top-6 sm:w-[132px] sm:px-4 sm:py-3"
+          style={{ borderColor: clockUrgent ? "#5A2A20" : "#46592C" }}
+        >
+          <div className="mb-1 flex items-center justify-center gap-1 font-mono text-[6px] font-bold tracking-[0.16em] text-board-secondary-alt sm:mb-2 sm:gap-1.5 sm:text-[8px] sm:tracking-[0.26em]">
+            <span
+              className="block h-1 w-1 rounded-full sm:h-1.5 sm:w-1.5"
+              style={{
+                background: clockUrgent ? "#F0644B" : "#CCFF00",
+                animation: `board-pulse ${clockUrgent ? "0.6s" : "1.1s"} ease-in-out infinite`,
+              }}
+            />
             PITCH CLOCK
           </div>
-          <div className="font-mono text-[32px] font-extrabold tracking-[0.08em] text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.55)]">
-            {formatClock(Math.max(0, project.pitchSeconds - elapsedSeconds))}
+          <div
+            className="font-mono text-[18px] font-extrabold tracking-[0.08em] transition-colors duration-500 sm:text-[32px]"
+            style={{
+              color: clockUrgent ? "#F0644B" : "#CCFF00",
+              textShadow: clockUrgent
+                ? "0 0 16px rgba(240,100,75,0.55)"
+                : "0 0 16px rgba(204,255,0,0.55)",
+            }}
+          >
+            {formatClock(remainingSeconds)}
           </div>
-          <div className="mt-2 font-mono text-[7px] font-bold tracking-[0.2em] text-board-tertiary">
+          <div className="mt-1.5 sm:mt-2.5">
+            <ProgressBar
+              percent={remainingPct}
+              trackClassName="bg-[#1E2419]"
+              fillClassName={clockUrgent ? "bg-[#F0644B]" : "bg-board-lime"}
+            />
+          </div>
+          <div className="mt-1.5 font-mono text-[6px] font-bold tracking-[0.14em] text-board-tertiary sm:mt-2 sm:text-[7px] sm:tracking-[0.2em]">
             REMAINING
           </div>
         </div>
@@ -347,7 +388,7 @@ export function RoomView({
           <button
             type="button"
             onClick={() => enter("A")}
-            className="flex min-w-0 flex-1 items-center justify-end gap-2 border-b-[3px] text-right transition sm:gap-4"
+            className="flex min-w-0 flex-1 items-center justify-end gap-2 border-b-[3px] pr-4 text-right transition sm:gap-4 sm:pr-8"
             style={{ borderBottomColor: current === "A" ? "#CCFF00" : progress.pA >= 100 ? "#2C4A32" : "#1A1E17" }}
           >
             <div className="min-w-0">
@@ -361,17 +402,13 @@ export function RoomView({
             <img src={projectA.mark} alt="" className="h-9 w-9 flex-none sm:h-[52px] sm:w-[52px]" />
           </button>
           <div className="flex w-[64px] flex-none items-center justify-center border-b-[3px] border-[#1A1E17] sm:w-[120px]">
-            <img
-              src="/marks/vs.png"
-              alt="VS"
-              className="h-7 w-14 animate-[board-floaty_4.2s_ease-in-out_infinite] sm:h-12 sm:w-24"
-            />
+            <VsMark className="h-7 w-14 sm:h-12 sm:w-24" />
           </div>
           <button
             type="button"
             onClick={() => enter("B")}
             disabled={progress.pA < 100}
-            className="flex min-w-0 flex-1 items-center justify-start gap-2 border-b-[3px] transition disabled:cursor-not-allowed sm:gap-4"
+            className="flex min-w-0 flex-1 items-center justify-start gap-2 border-b-[3px] pl-4 transition disabled:cursor-not-allowed sm:gap-4 sm:pl-8"
             style={{ borderBottomColor: current === "B" ? "#CCFF00" : progress.pB >= 100 ? "#2C4A32" : "#1A1E17" }}
           >
             <img src={projectB.mark} alt="" className="h-9 w-9 flex-none sm:h-[52px] sm:w-[52px]" />
@@ -442,13 +479,13 @@ export function RoomView({
 
 export function RoomHeaderRight({ room }: { room: Room }) {
   return (
-    <div className="flex items-center gap-2.5 border border-[#4E5C34] bg-[#12160A] px-3.5 py-2">
+    <div className="flex items-center gap-2.5 border-2 border-[#46592C] bg-[#080A05] px-3.5 py-2.5 shadow-[0_6px_22px_rgba(0,0,0,0.7)]">
       <span className="block h-1.5 w-1.5 animate-[board-pulse_1.6s_ease-in-out_infinite] rounded-full bg-board-lime" />
       <div className="text-right">
         <div className="font-mono text-[8px] font-bold tracking-[0.16em] text-board-secondary-alt">
           VOTING CLOSES
         </div>
-        <div className="mt-1 font-mono text-[13px] font-extrabold text-board-lime">
+        <div className="mt-1 font-mono text-[15px] font-extrabold text-board-lime [text-shadow:0_0_12px_rgba(204,255,0,0.5)]">
           <CountdownTimer target={room.closesAt} />
         </div>
       </div>

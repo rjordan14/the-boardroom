@@ -14,6 +14,7 @@ import { MatchupRow } from "@/components/lobby/MatchupRow";
 import { Bracket } from "@/components/lobby/Bracket";
 import { FloorPreview } from "@/components/lobby/FloorPreview";
 import { CountdownTimer } from "@/components/ui/CountdownTimer";
+import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 
 export default async function LobbyPage() {
   const [rooms, projectList, floorQuestions] = await Promise.all([
@@ -31,6 +32,7 @@ export default async function LobbyPage() {
 
   return (
     <div>
+      <RoundCloseEffect target={roundClosesAt} />
       <Header right={<WalletChip address="0x25…1A50" eligible />} />
 
       <div data-screen="lobby">

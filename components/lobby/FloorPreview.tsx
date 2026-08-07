@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { FloorQuestion } from "@/lib/mock/floor";
 import type { Project } from "@/lib/types";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
+import { SparkBurst } from "@/components/ui/SparkBurst";
 
 export function FloorPreview({
   questions,
@@ -16,6 +17,7 @@ export function FloorPreview({
   const floorUpvotes = useBoardroomStore((s) => s.floorUpvotes);
   const toggleFloorUpvote = useBoardroomStore((s) => s.toggleFloorUpvote);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [sparkingId, setSparkingId] = useState<string | null>(null);
 
   return (
     <div className="border border-board-border-alt bg-board-card-alt p-5">
@@ -45,15 +47,20 @@ export function FloorPreview({
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (!voted) {
+                      setSparkingId(q.id);
+                      setTimeout(() => setSparkingId((cur) => (cur === q.id ? null : cur)), 500);
+                    }
                     toggleFloorUpvote(q.id);
                   }}
-                  className="flex min-h-11 min-w-11 flex-none flex-col items-center justify-center gap-0.5 border transition active:scale-90"
+                  className="relative flex min-h-11 min-w-11 flex-none flex-col items-center justify-center gap-0.5 border transition active:scale-90"
                   style={{
                     borderColor: voted ? "#CCFF00" : "#2C3327",
                     background: voted ? "#161B08" : "#080A06",
                     color: voted ? "#CCFF00" : "#8A9184",
                   }}
                 >
+                  {sparkingId === q.id && <SparkBurst />}
                   <span className="font-mono text-[11px] font-extrabold">▲</span>
                   <span className="font-mono text-[11px] font-bold">
                     {q.upvotes + (voted ? 1 : 0)}

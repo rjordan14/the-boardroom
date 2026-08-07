@@ -1,4 +1,5 @@
 import type { Project, Room } from "@/lib/types";
+import { getResult } from "@/lib/mock/results";
 
 /**
  * Seed numbers are decorative bracket-position labels, not derived from
@@ -52,7 +53,11 @@ export function Bracket({
 
           <div className="flex flex-col justify-around gap-9 px-2.5">
             {left.map((room) => (
-              <SFPlaceholder key={room.id} roomId={room.id} />
+              <SFPlaceholder
+                key={room.id}
+                roomId={room.id}
+                winner={winnerFor(room, projects)}
+              />
             ))}
           </div>
 
@@ -60,7 +65,12 @@ export function Bracket({
 
           <div className="flex flex-col justify-around gap-9 px-2.5">
             {right.map((room) => (
-              <SFPlaceholder key={room.id} roomId={room.id} reverse />
+              <SFPlaceholder
+                key={room.id}
+                roomId={room.id}
+                winner={winnerFor(room, projects)}
+                reverse
+              />
             ))}
           </div>
 
@@ -161,7 +171,41 @@ function QFEntry({ project, seed, reverse }: { project: Project; seed: number; r
   );
 }
 
-function SFPlaceholder({ roomId, reverse }: { roomId: string; reverse?: boolean }) {
+function winnerFor(room: Room, projects: Record<string, Project>): Project | undefined {
+  const result = getResult(room.id);
+  return result ? projects[result.winnerKey] : undefined;
+}
+
+function SFPlaceholder({
+  roomId,
+  winner,
+  reverse,
+}: {
+  roomId: string;
+  winner?: Project;
+  reverse?: boolean;
+}) {
+  if (winner) {
+    return (
+      <div
+        className={`flex items-center gap-2.5 border border-board-lime bg-[#12160E] px-3.5 py-3 ${
+          reverse ? "flex-row-reverse text-right" : ""
+        }`}
+        style={{ animation: "board-stampin 500ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+      >
+        <img src={winner.mark} alt="" className="h-6 w-6 flex-none" />
+        <div className="min-w-0">
+          <div className="truncate font-mono text-[11px] font-extrabold text-board-lime">
+            {winner.name}
+          </div>
+          <div className="font-mono text-[8px] tracking-[0.12em] text-board-tertiary">
+            WINNER · ROOM {roomId}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`relative overflow-hidden border border-dashed border-[#6E8050] bg-[#12160E] px-3.5 py-3.5 font-mono text-[11px] font-bold tracking-[0.08em] text-board-body ${

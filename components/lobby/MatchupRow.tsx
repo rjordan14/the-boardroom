@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { Project, Room } from "@/lib/types";
 import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { VsMark } from "@/components/ui/VsMark";
 import { getRoomProgress, useBoardroomStore } from "@/store/useBoardroomStore";
 
 /**
@@ -111,7 +112,7 @@ export function MatchupRow({
           {statusBadge}
         </div>
         <ProjectLink project={projectA} />
-        <img src="/marks/vs.png" alt="VS" className="h-8 w-16 animate-[board-floaty_4.2s_ease-in-out_infinite]" />
+        <VsMark className="h-8 w-16" />
         <ProjectLink project={projectB} />
         {cta}
         {subPanel}
@@ -133,11 +134,7 @@ export function MatchupRow({
           <ProjectLink project={projectA} reverse />
 
           <div className="text-center">
-            <img
-              src="/marks/vs.png"
-              alt="VS"
-              className="mx-auto h-[43px] w-[86px] animate-[board-floaty_4.2s_ease-in-out_infinite]"
-            />
+            <VsMark className="mx-auto h-[43px] w-[86px]" />
           </div>
 
           <ProjectLink project={projectB} />

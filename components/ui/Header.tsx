@@ -20,7 +20,7 @@ export function Header({
       <div className="ml-auto flex items-center gap-3.5">
         <Link
           href="/my-activity"
-          className="border border-dashed border-[#3D4536] px-3.5 py-2.5 font-mono text-[10px] font-bold tracking-[0.1em] text-board-secondary transition hover:border-board-lime hover:text-board-lime"
+          className="border border-board-border bg-[#0E110C] px-3.5 py-2.5 font-mono text-[10px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:bg-[#12160A] hover:text-board-lime"
         >
           MY ACTIVITY
         </Link>

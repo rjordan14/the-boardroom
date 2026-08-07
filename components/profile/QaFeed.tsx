@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { QaItem } from "@/lib/types";
 import { getSubmittedQuestions, useBoardroomStore } from "@/store/useBoardroomStore";
+import { SparkBurst } from "@/components/ui/SparkBurst";
 
 interface FeedItem {
   id: string;
@@ -20,6 +21,7 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
   const submitQuestion = useBoardroomStore((s) => s.submitQuestion);
   const [draft, setDraft] = useState("");
   const [justPosted, setJustPosted] = useState(false);
+  const [sparkingId, setSparkingId] = useState<string | null>(null);
 
   const items: FeedItem[] = [
     ...qa.map((q) => ({
@@ -102,10 +104,17 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
           <div key={item.id} className="flex gap-4 border border-board-border-alt bg-board-card-alt p-4.5">
             <button
               type="button"
-              onClick={() => toggleQaUpvote(item.id)}
-              className="flex w-11 flex-none flex-col items-center gap-1 pt-0.5 transition hover:text-board-lime"
+              onClick={() => {
+                if (!qaUpvotes[item.id]) {
+                  setSparkingId(item.id);
+                  setTimeout(() => setSparkingId((cur) => (cur === item.id ? null : cur)), 500);
+                }
+                toggleQaUpvote(item.id);
+              }}
+              className="relative flex w-11 flex-none flex-col items-center gap-1 pt-0.5 transition hover:text-board-lime"
               style={{ color: qaUpvotes[item.id] ? "#CCFF00" : "#C4CCBB" }}
             >
+              {sparkingId === item.id && <SparkBurst />}
               <span className="font-mono text-[13px] font-extrabold">▲</span>
               <span className="font-mono text-[12px] font-bold">{item.upvotes}</span>
             </button>
