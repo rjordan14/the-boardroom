@@ -8,6 +8,7 @@ import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { ProgressBar } from "@/components/ui/ProgressBar";
 import { formatClock } from "@/lib/utils/format";
 import { getRoomProgress, useBoardroomStore } from "@/store/useBoardroomStore";
+import { AudienceRow } from "@/components/lobby/AudienceRow";
 
 /**
  * Progress advances over a fixed, fast simulated duration regardless of
@@ -124,11 +125,14 @@ export function RoomView({
   return (
     <div>
       <div className="relative h-[min(560px,50vw)] min-h-[320px] overflow-hidden bg-board-bg-media">
-        <img
-          src="/marks/room.png"
-          alt=""
-          className="absolute inset-x-0 top-[max(-64px,-6vw)] block w-full"
-        />
+        {/* This wrapper is sized to the image's true aspect ratio (the
+            outer frame is shorter and clips it via top offset below) —
+            AudienceRow's percentages need the real image dimensions to
+            land in the right place, not the clipped frame's. */}
+        <div className="absolute inset-x-0 top-[max(-64px,-6vw)] aspect-[1920/1080] w-full">
+          <img src="/marks/room.png" alt="" className="absolute inset-0 h-full w-full" />
+          <AudienceRow />
+        </div>
 
         <div className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-1.5 overflow-hidden bg-black pb-9 sm:gap-3 sm:pb-0">
           {/* pb-9 (sm:pb-0) reserves room for the absolutely-positioned
@@ -343,31 +347,35 @@ export function RoomView({
           <button
             type="button"
             onClick={() => enter("A")}
-            className="flex flex-1 items-center justify-end gap-4 border-b-[3px] text-right transition"
+            className="flex min-w-0 flex-1 items-center justify-end gap-2 border-b-[3px] text-right transition sm:gap-4"
             style={{ borderBottomColor: current === "A" ? "#CCFF00" : progress.pA >= 100 ? "#2C4A32" : "#1A1E17" }}
           >
-            <div>
-              <div className="font-mono text-[18px] font-extrabold text-board-heading">{projectA.name}</div>
-              <div className="mt-2 font-mono text-[11px] text-board-secondary">
+            <div className="min-w-0">
+              <div className="truncate font-mono text-[clamp(12px,4vw,18px)] font-extrabold text-board-heading">
+                {projectA.name}
+              </div>
+              <div className="mt-2 truncate font-mono text-[11px] text-board-secondary">
                 {current === "A" ? "NOW SHOWING" : progress.pA >= 100 ? "✓ WATCHED" : "NOT WATCHED"}
               </div>
             </div>
-            <img src={projectA.mark} alt="" className="h-[52px] w-[52px]" />
+            <img src={projectA.mark} alt="" className="h-9 w-9 flex-none sm:h-[52px] sm:w-[52px]" />
           </button>
-          <div className="flex w-[120px] flex-none items-center justify-center border-b-[3px] border-[#1A1E17]">
-            <img src="/marks/vs.png" alt="VS" className="h-12 w-24" />
+          <div className="flex w-[64px] flex-none items-center justify-center border-b-[3px] border-[#1A1E17] sm:w-[120px]">
+            <img src="/marks/vs.png" alt="VS" className="h-7 w-14 sm:h-12 sm:w-24" />
           </div>
           <button
             type="button"
             onClick={() => enter("B")}
             disabled={progress.pA < 100}
-            className="flex flex-1 items-center justify-start gap-4 border-b-[3px] transition disabled:cursor-not-allowed"
+            className="flex min-w-0 flex-1 items-center justify-start gap-2 border-b-[3px] transition disabled:cursor-not-allowed sm:gap-4"
             style={{ borderBottomColor: current === "B" ? "#CCFF00" : progress.pB >= 100 ? "#2C4A32" : "#1A1E17" }}
           >
-            <img src={projectB.mark} alt="" className="h-[52px] w-[52px]" />
-            <div>
-              <div className="font-mono text-[18px] font-extrabold text-board-heading">{projectB.name}</div>
-              <div className="mt-2 font-mono text-[11px] text-board-secondary">
+            <img src={projectB.mark} alt="" className="h-9 w-9 flex-none sm:h-[52px] sm:w-[52px]" />
+            <div className="min-w-0">
+              <div className="truncate font-mono text-[clamp(12px,4vw,18px)] font-extrabold text-board-heading">
+                {projectB.name}
+              </div>
+              <div className="mt-2 truncate font-mono text-[11px] text-board-secondary">
                 {current === "B"
                   ? "NOW SHOWING"
                   : progress.pB >= 100

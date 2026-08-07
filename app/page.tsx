@@ -13,6 +13,7 @@ import { YourRoundStrip } from "@/components/lobby/YourRoundStrip";
 import { MatchupRow } from "@/components/lobby/MatchupRow";
 import { Bracket } from "@/components/lobby/Bracket";
 import { FloorPreview } from "@/components/lobby/FloorPreview";
+import { CountdownTimer } from "@/components/ui/CountdownTimer";
 
 export default async function LobbyPage() {
   const [rooms, projectList, floorQuestions] = await Promise.all([
@@ -22,6 +23,11 @@ export default async function LobbyPage() {
   ]);
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
   const firstOpen = rooms.find((r) => r.status === "open") ?? rooms[0];
+  const openRooms = rooms.filter((r) => r.status === "open");
+  const roundComplete = openRooms.length === 0;
+  const roundClosesAt = openRooms.length
+    ? openRooms.reduce((latest, r) => (r.closesAt > latest ? r.closesAt : latest), openRooms[0].closesAt)
+    : null;
 
   return (
     <div>
@@ -48,11 +54,28 @@ export default async function LobbyPage() {
         <ActivityTicker />
 
         <div className="px-[clamp(14px,4vw,48px)] pt-12">
-          <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
-            TODAY&apos;S MATCHUPS
-          </div>
-          <div className="font-mono text-[12px] text-[#7C8474]">
-            Clock in, watch, vote. No gatekeepers.
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
+                TODAY&apos;S MATCHUPS
+              </div>
+              <div className="font-mono text-[12px] text-[#7C8474]">
+                Clock in, watch, vote. No gatekeepers.
+              </div>
+            </div>
+            {!roundComplete && roundClosesAt && (
+              <div className="flex items-center gap-2.5 border-2 border-board-lime bg-[#111607] px-4 py-2.5">
+                <span className="block h-2 w-2 animate-[board-pulse_1.5s_ease-in-out_infinite] rounded-full bg-board-lime" />
+                <div>
+                  <div className="font-mono text-[9px] font-bold tracking-[0.2em] text-board-secondary-alt">
+                    ROUND VOTING ENDS IN
+                  </div>
+                  <div className="font-mono text-[18px] font-extrabold leading-tight text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.4)]">
+                    <CountdownTimer target={roundClosesAt} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-4">
@@ -66,6 +89,7 @@ export default async function LobbyPage() {
                 room={room}
                 projectA={projects[room.projectA]}
                 projectB={projects[room.projectB]}
+                roundComplete={roundComplete}
               />
             ))}
           </div>

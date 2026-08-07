@@ -18,10 +18,16 @@ export function MatchupRow({
   room,
   projectA,
   projectB,
+  roundComplete,
 }: {
   room: Room;
   projectA: Project;
   projectB: Project;
+  /** Whether every room in this round has closed — results stay sealed
+   *  per-room until then, even if this specific room's own voting
+   *  window already ended (leaking one room's result while siblings
+   *  are still open would defeat the point of sealing ballots at all). */
+  roundComplete: boolean;
 }) {
   const progress = useBoardroomStore((s) => getRoomProgress(s.watchProgress, room.id));
   const ballotChoice = useBoardroomStore((s) => s.ballotChoice[room.id]);
@@ -35,22 +41,24 @@ export function MatchupRow({
   // A sealed ballot outranks room status — voting closed doesn't erase
   // that this wallet already voted, and a wallet that finished both
   // pitches but hasn't voted yet is a distinct state from "just started".
-  const state: "voted" | "closed" | "watching" | "not_started" = voted
+  const state: "voted" | "closed" | "awaiting_round" | "watching" | "not_started" = voted
     ? "voted"
     : !isOpen
-      ? "closed"
+      ? roundComplete
+        ? "closed"
+        : "awaiting_round"
       : started
         ? "watching"
         : "not_started";
   const chosenProject = voted ? (projectA.key === ballotChoice ? projectA : projectB) : null;
-  const accent = state === "closed" ? "#4ADE80" : voted ? "#4ADE80" : "#CCFF00";
+  const accent = state === "closed" || state === "awaiting_round" ? "#4ADE80" : voted ? "#4ADE80" : "#CCFF00";
 
   const statusBadge =
     state === "voted" ? (
       <span className="font-mono text-[9px] font-bold tracking-[0.1em] text-board-success">
         ✓ BALLOT SEALED
       </span>
-    ) : state === "closed" ? (
+    ) : state === "closed" || state === "awaiting_round" ? (
       <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-board-tertiary">
         CLOSED
       </span>
@@ -63,6 +71,8 @@ export function MatchupRow({
   const cta =
     state === "closed" ? (
       <ResultCta roomId={room.id} />
+    ) : state === "awaiting_round" ? (
+      <AwaitingRoundNotice />
     ) : state === "voted" ? (
       <ReviewCta />
     ) : bothWatched ? (
@@ -78,7 +88,7 @@ export function MatchupRow({
         watchStartedAt={watchStartedAt}
         ballotSealedAt={ballotSealedAt}
       />
-    ) : state !== "closed" ? (
+    ) : state !== "closed" && state !== "awaiting_round" ? (
       <ProgressSubPanel
         progress={progress}
         bothWatched={bothWatched}
@@ -209,6 +219,16 @@ function ReviewCta() {
         VIEW MY BALLOT →
       </span>
     </Link>
+  );
+}
+
+function AwaitingRoundNotice() {
+  return (
+    <div className="block w-full max-w-[252px] border border-dashed border-board-border px-3.5 py-3.5 text-center">
+      <span className="font-mono text-[10px] font-bold tracking-[0.08em] text-board-tertiary">
+        RESULT AFTER ROUND CLOSES
+      </span>
+    </div>
   );
 }
 

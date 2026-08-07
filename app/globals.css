@@ -50,6 +50,12 @@ body {
   margin: 0;
   padding: 0;
   background: var(--color-board-bg);
+  /* Decorative full-bleed animations (marquee, sheen, confetti) can
+   * transiently overshoot their container by a sub-pixel or two on
+   * specific animation frames — confirmed harmless and self-correcting
+   * within ~300ms, but there's no reason the page body should ever be
+   * horizontally scrollable because of it. */
+  overflow-x: hidden;
 }
 
 body {
@@ -437,5 +443,20 @@ img {
   100% {
     transform: translateY(320px) rotate(420deg);
     opacity: 0;
+  }
+}
+
+@keyframes board-check-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.35);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }

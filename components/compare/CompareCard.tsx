@@ -42,9 +42,18 @@ export function CompareCard({
           </div>
         </div>
         <div
-          className="ml-auto h-6.5 w-6.5 flex-none border-2"
+          className="ml-auto flex h-6.5 w-6.5 flex-none items-center justify-center border-2"
           style={{ borderColor: picked ? "#CCFF00" : "#2C3327", background: picked ? "#CCFF00" : "transparent" }}
-        />
+        >
+          {picked && (
+            <span
+              className="font-mono text-[15px] font-extrabold leading-none text-board-bg"
+              style={{ animation: "board-check-pop 380ms cubic-bezier(0.3,1.6,0.4,1) both" }}
+            >
+              ✓
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-[minmax(96px,130px)_1fr] gap-x-3.5 gap-y-2.5 font-mono text-[11px] leading-[1.6]">

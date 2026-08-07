@@ -1,3 +1,5 @@
+import { AudienceRow } from "./AudienceRow";
+
 export function Hero() {
   return (
     <div className="relative aspect-[1920/1080] overflow-hidden bg-board-bg-media">
@@ -6,6 +8,7 @@ export function Hero() {
         alt="The Boardroom conference room"
         className="absolute inset-x-0 top-0 block w-full"
       />
+      <AudienceRow />
       <div className="absolute inset-x-0 top-0 h-[12%] animate-[board-flicker_7s_infinite] bg-gradient-to-b from-board-lime to-transparent opacity-[0.06]" />
       <div className="pointer-events-none absolute inset-0 w-1/3 -skew-x-12 animate-[board-sheen_9s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/[0.04] to-transparent" />
 
