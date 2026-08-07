@@ -40,7 +40,7 @@ export function CompareView({
 
   const handleCeremonyComplete = () => {
     if (!choice) return;
-    setBallotChoice(room.id, choice);
+    setBallotChoice(room.id, choice === "A" ? projectA.key : projectB.key);
     router.push(`/room/${room.id}/sealed`);
   };
 

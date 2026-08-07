@@ -48,7 +48,10 @@ function TickerRow({
   glow?: boolean;
 }) {
   return (
-    <div className="flex w-max" style={{ animation: `board-marquee ${speed} linear infinite` }}>
+    <div
+      className="flex w-max"
+      style={{ animation: `board-marquee ${speed} linear infinite`, gap: `calc(${size} * 0.55)` }}
+    >
       {[0, 1].map((i) => (
         <div
           key={i}
@@ -59,7 +62,7 @@ function TickerRow({
             animation: glow ? "board-glow 1.6s ease-in-out infinite" : undefined,
           }}
         >
-          ONE OF US! ONE OF US! ONE OF US! ONE OF US! ONE OF US!{" "}
+          ONE OF US! ONE OF US! ONE OF US! ONE OF US! ONE OF US!
         </div>
       ))}
     </div>
