@@ -30,7 +30,7 @@ export function Hero() {
       </div>
 
       <div className="absolute right-[clamp(12px,2.4cqw,48px)] top-[clamp(10px,1.6cqw,26px)] border border-[rgba(204,255,0,0.22)] bg-[rgba(4,6,10,0.72)] px-[clamp(9px,1.1cqw,15px)] py-[clamp(6px,0.8cqw,11px)] text-right font-mono text-[clamp(8px,1.05cqw,15px)] leading-[1.6] tracking-[0.06em] text-[#B9C9A2] backdrop-blur-sm">
-        CONFERENCE ROOM · THE BOARDROOM
+        THE BOARDROOM
         <br />
         <span className="font-bold text-board-lime">12,481 SEATED</span>
       </div>

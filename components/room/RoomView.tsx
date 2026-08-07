@@ -361,7 +361,11 @@ export function RoomView({
             <img src={projectA.mark} alt="" className="h-9 w-9 flex-none sm:h-[52px] sm:w-[52px]" />
           </button>
           <div className="flex w-[64px] flex-none items-center justify-center border-b-[3px] border-[#1A1E17] sm:w-[120px]">
-            <img src="/marks/vs.png" alt="VS" className="h-7 w-14 sm:h-12 sm:w-24" />
+            <img
+              src="/marks/vs.png"
+              alt="VS"
+              className="h-7 w-14 animate-[board-floaty_4.2s_ease-in-out_infinite] sm:h-12 sm:w-24"
+            />
           </div>
           <button
             type="button"

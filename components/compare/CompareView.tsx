@@ -76,7 +76,11 @@ export function CompareView({
           onOpenProfile={() => setModalKey("A")}
         />
         <div className="flex w-full basis-full justify-center py-1 lg:w-auto lg:basis-auto lg:py-0">
-          <img src="/marks/vs.png" alt="VS" className="h-auto w-[clamp(84px,9vw,132px)] self-center" />
+          <img
+            src="/marks/vs.png"
+            alt="VS"
+            className="h-auto w-[clamp(84px,9vw,132px)] animate-[board-floaty_4.2s_ease-in-out_infinite] self-center"
+          />
         </div>
         <CompareCard
           project={projectB}
