@@ -1,23 +1,39 @@
-import type { Project } from "@/lib/types";
+import type { Project, QaItem } from "@/lib/types";
 
 export function CompareCard({
   project,
+  qa,
   picked,
   onPick,
   onOpenProfile,
 }: {
   project: Project;
+  qa: QaItem[];
   picked: boolean;
   onPick: () => void;
   onOpenProfile: () => void;
 }) {
   const doxxed = project.people.filter((p) => p.handle);
+  const answeredCount = qa.filter((q) => q.answer).length;
+  const topQuestions = [...qa].sort((a, b) => b.upvotes - a.upvotes).slice(0, 2);
 
   return (
-    <button
-      type="button"
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onPick}
-      className="flex min-w-0 flex-1 basis-[240px] flex-col gap-4 border-2 p-6 text-left transition hover:-translate-y-0.5"
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onPick();
+        }
+      }}
+      // A real <button> can't contain other interactive elements (the
+      // profile button, X links, the mark's own click target) — the
+      // browser would silently split the DOM at the first nested
+      // <button>. A div with the button role gets the same semantics
+      // and click/keyboard behavior without that HTML constraint.
+      className="flex min-w-0 flex-1 basis-[240px] cursor-pointer flex-col gap-4 border-2 p-6 text-left transition hover:-translate-y-0.5"
       style={{
         borderColor: picked ? "#CCFF00" : "#2C3327",
         background: picked ? "#141A08" : "#0E110C",
@@ -95,7 +111,34 @@ export function CompareCard({
             ))}
           </div>
         )}
+
+        {qa.length > 0 && (
+          <div>
+            <div className="font-mono text-[9px] font-bold tracking-[0.14em] text-board-tertiary">
+              ASK THE TEAM · {answeredCount} of {qa.length} answered
+            </div>
+            <div className="mt-2 flex flex-col gap-1.5">
+              {topQuestions.map((q) => (
+                <div key={q.id} className="border-l-2 border-[#2C3327] pl-2.5 font-mono text-[11px] leading-[1.5] text-board-body">
+                  &quot;{q.question}&quot;
+                  {q.answer && <span className="ml-1.5 text-[9px] font-bold text-board-success">✓ ANSWERED</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenProfile();
+          }}
+          className="self-start font-mono text-[10px] font-bold tracking-[0.08em] text-board-lime transition hover:translate-x-0.5"
+        >
+          VIEW FULL PROFILE ↗
+        </button>
       </div>
-    </button>
+    </div>
   );
 }

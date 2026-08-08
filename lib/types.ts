@@ -36,6 +36,17 @@ export interface QaItem {
   flag?: string | null;
 }
 
+/** Freeform commentary, separate from the Q&A ask/answer flow — no
+ *  answer field, no team reply, just the crowd talking. */
+export interface Comment {
+  id: string;
+  projectKey: ProjectKey;
+  author: string;
+  text: string;
+  postedAt: number;
+  likes: number;
+}
+
 export type RoomStatus = "open" | "closed" | "upcoming";
 
 export interface Room {

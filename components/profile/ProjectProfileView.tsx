@@ -1,8 +1,17 @@
-import type { Project, QaItem } from "@/lib/types";
+import type { Comment, Project, QaItem } from "@/lib/types";
 import { formatClock } from "@/lib/utils/format";
 import { QaFeed } from "@/components/profile/QaFeed";
+import { CommentsSection } from "@/components/profile/CommentsSection";
 
-export function ProjectProfileView({ project, qa }: { project: Project; qa: QaItem[] }) {
+export function ProjectProfileView({
+  project,
+  qa,
+  comments,
+}: {
+  project: Project;
+  qa: QaItem[];
+  comments: Comment[];
+}) {
   return (
     <div className="mx-auto max-w-[1000px] px-[clamp(14px,4vw,48px)] py-10">
       <div className="flex items-center gap-5.5">
@@ -74,6 +83,10 @@ export function ProjectProfileView({ project, qa }: { project: Project; qa: QaIt
 
       <div className="mt-8.5">
         <QaFeed projectKey={project.key} projectName={project.name} qa={qa} />
+      </div>
+
+      <div className="mt-8.5">
+        <CommentsSection projectKey={project.key} projectName={project.name} comments={comments} />
       </div>
     </div>
   );

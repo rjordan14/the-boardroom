@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { Comment, ProjectKey } from "@/lib/types";
 
 interface WatchProgress {
   pA: number;
@@ -23,6 +24,18 @@ export interface SubmittedQuestion {
 // Same reference-stability concern as EMPTY_PROGRESS above, for
 // projects with no locally-submitted questions yet.
 const EMPTY_QUESTIONS: SubmittedQuestion[] = [];
+
+export interface PitchReaction {
+  id: string;
+  emoji: string;
+  /** Simulated playback position (seconds) when this was fired — later
+   *  viewers replay it as their own playback crosses this mark. */
+  atSeconds: number;
+}
+
+const EMPTY_REACTIONS: PitchReaction[] = [];
+
+const EMPTY_COMMENTS: Comment[] = [];
 
 interface BoardroomState {
   /** Keyed by roomId. Lifted out of the Room page so progress survives
@@ -66,6 +79,23 @@ interface BoardroomState {
    *  screen this session. No backend to post to, so this IS the record. */
   submittedQuestions: Record<string, SubmittedQuestion[]>;
   submitQuestion: (projectKey: string, question: string) => void;
+
+  /** Keyed by project.key (a pitch belongs to the project, not a room —
+   *  reused if the same project ever appears in a replayed room). Every
+   *  reaction anyone has fired replays for later viewers as their own
+   *  simulated playback crosses `atSeconds` — see
+   *  components/room/PitchReactionLayer.tsx. */
+  pitchReactions: Record<string, PitchReaction[]>;
+  addPitchReaction: (projectKey: string, emoji: string, atSeconds: number) => void;
+
+  /** Freeform comments, separate from the Q&A ask/answer flow — keyed
+   *  by projectKey. Mock seed comments live in lib/mock/comments.ts;
+   *  this is only the locally-posted ones, merged client-side same as
+   *  submittedQuestions above. */
+  postedComments: Record<string, Comment[]>;
+  postComment: (projectKey: ProjectKey, author: string, text: string) => void;
+  commentLikes: Record<string, boolean>;
+  toggleCommentLike: (commentId: string) => void;
 
   /** Cosmetic-only for now (leaderboard/profile flex) — see the
    *  session's points-system decision: never touches vote weight. */
@@ -188,6 +218,46 @@ export const useBoardroomStore = create<BoardroomState>((set, get) => ({
     }));
     get().awardPoints(5, "Asked a question");
   },
+
+  pitchReactions: {},
+  addPitchReaction: (projectKey, emoji, atSeconds) => {
+    set((state) => ({
+      pitchReactions: {
+        ...state.pitchReactions,
+        [projectKey]: [
+          ...(state.pitchReactions[projectKey] ?? EMPTY_REACTIONS),
+          { id: `rx-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, emoji, atSeconds },
+        ],
+      },
+    }));
+    get().awardPoints(2, "Reacted to a pitch");
+  },
+
+  postedComments: {},
+  postComment: (projectKey, author, text) => {
+    set((state) => ({
+      postedComments: {
+        ...state.postedComments,
+        [projectKey]: [
+          ...(state.postedComments[projectKey] ?? EMPTY_COMMENTS),
+          {
+            id: `cm-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+            projectKey,
+            author,
+            text,
+            postedAt: Date.now(),
+            likes: 0,
+          },
+        ],
+      },
+    }));
+    get().awardPoints(3, "Posted a comment");
+  },
+  commentLikes: {},
+  toggleCommentLike: (commentId) =>
+    set((state) => ({
+      commentLikes: { ...state.commentLikes, [commentId]: !state.commentLikes[commentId] },
+    })),
 
   points: 0,
   pointsLog: [],

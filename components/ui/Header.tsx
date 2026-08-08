@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { PointsChip } from "@/components/ui/PointsChip";
+import { HeaderNavLink } from "@/components/ui/HeaderNavLink";
 
 export function Header({
   left,
@@ -18,20 +19,13 @@ export function Header({
         THE BOARDROOM
       </Link>
       {left}
-      <div className="ml-auto flex items-center gap-3.5">
+      <div className="ml-auto flex flex-wrap items-center justify-end gap-3.5">
         <PointsChip />
-        <Link
-          href="/apply"
-          className="border border-board-border-alt px-3.5 py-2.5 font-mono text-[10px] font-bold tracking-[0.1em] text-board-secondary transition hover:border-board-lime hover:text-board-lime"
-        >
-          APPLY
-        </Link>
-        <Link
-          href="/my-activity"
-          className="border border-board-border bg-[#0E110C] px-3.5 py-2.5 font-mono text-[10px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:bg-[#12160A] hover:text-board-lime"
-        >
+        <HeaderNavLink href="/floor">THE FLOOR</HeaderNavLink>
+        <HeaderNavLink href="/apply">APPLY</HeaderNavLink>
+        <HeaderNavLink href="/my-activity" variant="filled">
           MY ACTIVITY
-        </Link>
+        </HeaderNavLink>
         {right}
       </div>
     </div>

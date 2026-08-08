@@ -72,8 +72,9 @@ export function CompareView({
       <div className="flex flex-wrap items-stretch gap-4 px-[clamp(14px,4vw,48px)] pt-7.5">
         <CompareCard
           project={projectA}
+          qa={qaByProject[projectA.key] ?? []}
           picked={choice === "A"}
-          onPick={() => setChoice("A")}
+          onPick={() => setChoice((c) => (c === "A" ? null : "A"))}
           onOpenProfile={() => setModalKey("A")}
         />
         <div className="flex w-full basis-full justify-center py-1 lg:w-auto lg:basis-auto lg:py-0">
@@ -81,8 +82,9 @@ export function CompareView({
         </div>
         <CompareCard
           project={projectB}
+          qa={qaByProject[projectB.key] ?? []}
           picked={choice === "B"}
-          onPick={() => setChoice("B")}
+          onPick={() => setChoice((c) => (c === "B" ? null : "B"))}
           onOpenProfile={() => setModalKey("B")}
         />
       </div>

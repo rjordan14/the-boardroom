@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import type { Project, Room } from "@/lib/types";
 import { CountdownTimer } from "@/components/ui/CountdownTimer";
@@ -11,6 +12,7 @@ import { getRoomProgress, useBoardroomStore } from "@/store/useBoardroomStore";
 import { AudienceRow } from "@/components/lobby/AudienceRow";
 import { VsMark } from "@/components/ui/VsMark";
 import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
+import { PitchReactionLayer } from "@/components/room/PitchReactionLayer";
 
 /**
  * Progress advances over a fixed, fast simulated duration regardless of
@@ -174,7 +176,7 @@ export function RoomView({
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-4 py-3.5">
+          <div className="absolute inset-x-0 bottom-0 z-[3] bg-gradient-to-t from-black/90 to-transparent px-4 py-3.5">
             <ProgressBar percent={pct} trackClassName="bg-[#1E2419]" />
             <div className="mt-2 flex justify-between font-mono text-[10px] text-board-secondary">
               <span>
@@ -185,6 +187,10 @@ export function RoomView({
               </span>
             </div>
           </div>
+
+          {phase === "playing" && (
+            <PitchReactionLayer projectKey={project.key} elapsedSeconds={elapsedSeconds} />
+          )}
 
           <AnimatePresence>
             {phase === "done" && (
@@ -432,8 +438,16 @@ export function RoomView({
 
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] items-start gap-5 px-[clamp(14px,4vw,48px)] py-8">
         <div className="border border-board-border-alt bg-board-card-alt p-6">
-          <div className="mb-4 font-mono text-[14px] font-extrabold tracking-[0.06em] text-board-heading">
-            {project.name} · KEY FACTS
+          <div className="mb-4 flex items-baseline justify-between gap-3">
+            <div className="font-mono text-[14px] font-extrabold tracking-[0.06em] text-board-heading">
+              {project.name} · KEY FACTS
+            </div>
+            <Link
+              href={`/profile/${project.key}`}
+              className="flex-none font-mono text-[10px] font-bold tracking-[0.06em] text-board-lime transition hover:translate-x-0.5"
+            >
+              FULL PROFILE →
+            </Link>
           </div>
           <div className="grid grid-cols-[minmax(104px,150px)_1fr] gap-x-4.5 gap-y-2.5 font-mono text-[11px] leading-[1.6]">
             <span className="text-board-tertiary">TEAM</span>

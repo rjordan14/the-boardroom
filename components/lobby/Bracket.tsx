@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Project, Room } from "@/lib/types";
 import { getResult } from "@/lib/mock/results";
 import { EliminatedIcon, EliminatedLabel } from "./EliminationFall";
@@ -97,14 +98,15 @@ export function Bracket({
               </div>
               <div className="flex flex-col gap-1 p-2">
                 {[a, b].map((p) => (
-                  <div
+                  <Link
                     key={p.key}
-                    className="flex items-center gap-2.5 border border-board-border-alt bg-board-card px-3 py-2"
+                    href={`/profile/${p.key}`}
+                    className="flex items-center gap-2.5 border border-board-border-alt bg-board-card px-3 py-2 transition hover:bg-[#151A11]"
                     style={{ borderLeft: "3px solid #CCFF00" }}
                   >
                     <img src={p.mark} alt="" className="h-[22px] w-[22px]" />
                     <span className="font-mono text-[11px] font-bold text-board-body">{p.name}</span>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -171,9 +173,10 @@ function QFEntry({
   eliminated?: boolean;
 }) {
   return (
-    <div
+    <Link
+      href={`/profile/${project.key}`}
       className={`flex items-center gap-2.5 border px-3 py-2.5 transition ${
-        eliminated ? "border-[#2A241E] bg-[#0E0C09]" : "border-board-border bg-board-card-alt hover:bg-[#151A11]"
+        eliminated ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]" : "border-board-border bg-board-card-alt hover:bg-[#151A11]"
       } ${reverse ? "flex-row-reverse text-right" : ""}`}
       style={
         eliminated
@@ -196,7 +199,7 @@ function QFEntry({
       ) : (
         <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
       )}
-    </div>
+    </Link>
   );
 }
 

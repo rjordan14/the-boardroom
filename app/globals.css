@@ -645,3 +645,21 @@ img {
     transform: scale(1);
   }
 }
+
+/* Pitch reaction float — see components/room/PitchReactionLayer.tsx.
+ * Confined to the lower third of the video frame by the layer's own
+ * clipping container, not by this keyframe's travel distance. */
+@keyframes board-reaction-float {
+  0% {
+    transform: translateY(0) scale(0.7);
+    opacity: 0;
+  }
+  15% {
+    transform: translateY(-8px) scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-64px) scale(0.95);
+    opacity: 0;
+  }
+}
