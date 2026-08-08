@@ -63,6 +63,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Tailwind's Preflight deliberately stopped setting cursor: pointer on
+ * buttons as of v3 (left as an opinionated choice for consumers) — this
+ * app uses <button> for nearly every custom-styled clickable element
+ * (cards, tabs, upvotes, CTAs), so without this every one of them shows
+ * a plain arrow instead of a pointer. */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 img {
   image-rendering: pixelated;
 }
