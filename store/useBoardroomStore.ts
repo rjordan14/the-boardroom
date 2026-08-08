@@ -66,9 +66,53 @@ interface BoardroomState {
    *  screen this session. No backend to post to, so this IS the record. */
   submittedQuestions: Record<string, SubmittedQuestion[]>;
   submitQuestion: (projectKey: string, question: string) => void;
+
+  /** Cosmetic-only for now (leaderboard/profile flex) — see the
+   *  session's points-system decision: never touches vote weight. */
+  points: number;
+  pointsLog: PointsLogEntry[];
+  awardPoints: (amount: number, reason: string) => void;
+
+  /** Keyed by projectKey — the live "king of the hill" head-to-head
+   *  between that project's two top-upvoted not-yet-crowned questions.
+   *  One battle at a time per project; resolves on a timer (see
+   *  BATTLE_DURATION_MS in QaBattle.tsx) into `crowns`. */
+  battles: Record<string, QaBattle>;
+  startBattle: (projectKey: string, aId: string, bId: string, seedA: number, seedB: number) => void;
+  /** battleKey = `${projectKey}:${aId}:${bId}` — scopes a user's vote to
+   *  this specific pairing so a later, different pairing isn't silently
+   *  pre-voted by a stale key collision. */
+  battleVotes: Record<string, "A" | "B">;
+  castBattleVote: (projectKey: string, battleKey: string, side: "A" | "B") => void;
+  /** Keyed by projectKey — most recent champion; a fresh battle winner
+   *  replaces it (dethroning, not accumulating a full history). */
+  crowns: Record<string, Crown>;
+  resolveBattle: (projectKey: string, battleKey: string, winner: Crown, winningSide: "A" | "B") => void;
 }
 
-export const useBoardroomStore = create<BoardroomState>((set) => ({
+export interface PointsLogEntry {
+  id: string;
+  amount: number;
+  reason: string;
+  at: number;
+}
+
+export interface QaBattle {
+  aId: string;
+  bId: string;
+  votesA: number;
+  votesB: number;
+  startedAt: number;
+}
+
+export interface Crown {
+  questionId: string;
+  question: string;
+  asker: string;
+  wonAt: number;
+}
+
+export const useBoardroomStore = create<BoardroomState>((set, get) => ({
   watchProgress: {},
   setWatchProgress: (roomId, key, value) =>
     set((state) => ({
@@ -97,11 +141,13 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
   closeProfileModal: () => set({ modalProjectKey: null }),
 
   ballotChoice: {},
-  setBallotChoice: (roomId, projectKey) =>
+  setBallotChoice: (roomId, projectKey) => {
     set((state) => ({
       ballotChoice: { ...state.ballotChoice, [roomId]: projectKey },
       ballotSealedAt: { ...state.ballotSealedAt, [roomId]: Date.now() },
-    })),
+    }));
+    get().awardPoints(25, "Ballot sealed");
+  },
 
   ballotSealedAt: {},
 
@@ -113,13 +159,15 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
         [roomId]: { amount, escrowed: state.backing[roomId]?.escrowed ?? false },
       },
     })),
-  setBackingEscrowed: (roomId, escrowed) =>
+  setBackingEscrowed: (roomId, escrowed) => {
     set((state) => ({
       backing: {
         ...state.backing,
         [roomId]: { amount: state.backing[roomId]?.amount ?? 888, escrowed },
       },
-    })),
+    }));
+    if (escrowed) get().awardPoints(15, "Backed a project");
+  },
 
   qaUpvotes: {},
   toggleQaUpvote: (qaId) =>
@@ -128,7 +176,7 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
     })),
 
   submittedQuestions: {},
-  submitQuestion: (projectKey, question) =>
+  submitQuestion: (projectKey, question) => {
     set((state) => ({
       submittedQuestions: {
         ...state.submittedQuestions,
@@ -137,7 +185,66 @@ export const useBoardroomStore = create<BoardroomState>((set) => ({
           { id: `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, question, askedAt: Date.now() },
         ],
       },
+    }));
+    get().awardPoints(5, "Asked a question");
+  },
+
+  points: 0,
+  pointsLog: [],
+  awardPoints: (amount, reason) =>
+    set((state) => ({
+      points: state.points + amount,
+      // Capped so a long session doesn't grow this without bound — only
+      // the most recent handful are ever shown anywhere.
+      pointsLog: [{ id: `pt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, amount, reason, at: Date.now() }, ...state.pointsLog].slice(0, 20),
     })),
+
+  battles: {},
+  startBattle: (projectKey, aId, bId, seedA, seedB) =>
+    set((state) =>
+      state.battles[projectKey]
+        ? state
+        : {
+            battles: {
+              ...state.battles,
+              [projectKey]: { aId, bId, votesA: seedA, votesB: seedB, startedAt: Date.now() },
+            },
+          }
+    ),
+
+  battleVotes: {},
+  castBattleVote: (projectKey, battleKey, side) =>
+    set((state) => {
+      if (state.battleVotes[battleKey]) return state;
+      const battle = state.battles[projectKey];
+      if (!battle) return state;
+      return {
+        battleVotes: { ...state.battleVotes, [battleKey]: side },
+        battles: {
+          ...state.battles,
+          [projectKey]: {
+            ...battle,
+            votesA: battle.votesA + (side === "A" ? 1 : 0),
+            votesB: battle.votesB + (side === "B" ? 1 : 0),
+          },
+        },
+      };
+    }),
+
+  crowns: {},
+  resolveBattle: (projectKey, battleKey, winner, winningSide) => {
+    set((state) => {
+      const restBattles = { ...state.battles };
+      delete restBattles[projectKey];
+      return {
+        battles: restBattles,
+        crowns: { ...state.crowns, [projectKey]: winner },
+      };
+    });
+    if (get().battleVotes[battleKey] === winningSide) {
+      get().awardPoints(10, "Backed the winning question");
+    }
+  },
 }));
 
 export function getRoomProgress(

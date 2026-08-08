@@ -2,6 +2,7 @@
 
 import type { QaItem } from "@/lib/types";
 import { usePortalStore } from "@/store/usePortalStore";
+import { VideoAnswerRecorder } from "@/components/portal/VideoAnswerRecorder";
 
 export function PortalQaTab({ qa }: { qa: QaItem[] }) {
   const answers = usePortalStore((s) => s.answers);
@@ -76,6 +77,8 @@ export function PortalQaTab({ qa }: { qa: QaItem[] }) {
                   REPLY →
                 </button>
               )}
+
+              <VideoAnswerRecorder questionId={q.id} />
             </div>
           );
         })}

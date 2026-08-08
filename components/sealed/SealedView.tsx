@@ -47,8 +47,9 @@ export function SealedView({
 
   const handleShare = async () => {
     try {
+      const link = `${window.location.origin}/room/${room.id}/sealed`;
       await navigator.clipboard.writeText(
-        `${window.location.origin}/room/${room.id}/sealed`
+        `🗳️ Just clocked into THE BOARDROOM — voted for ${chosenProject.name} in Room ${room.id}. Ballot sealed, results hidden until the round closes.\n${link}`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 1800);

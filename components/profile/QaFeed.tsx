@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { QaItem } from "@/lib/types";
 import { getSubmittedQuestions, useBoardroomStore } from "@/store/useBoardroomStore";
 import { SparkBurst } from "@/components/ui/SparkBurst";
+import { QaBattle } from "@/components/profile/QaBattle";
 
 interface FeedItem {
   id: string;
@@ -19,11 +20,29 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
   const toggleQaUpvote = useBoardroomStore((s) => s.toggleQaUpvote);
   const submitted = useBoardroomStore((s) => getSubmittedQuestions(s.submittedQuestions, projectKey));
   const submitQuestion = useBoardroomStore((s) => s.submitQuestion);
+  const crown = useBoardroomStore((s) => s.crowns[projectKey]);
   const [draft, setDraft] = useState("");
   const [justPosted, setJustPosted] = useState(false);
   const [sparkingId, setSparkingId] = useState<string | null>(null);
+  const [crownCopied, setCrownCopied] = useState(false);
 
-  const items: FeedItem[] = [
+  const shareCrown = async () => {
+    if (!crown) return;
+    try {
+      const mine = crown.asker === "you";
+      const text = mine
+        ? `👑 My question just got crowned best question on ${projectName} in THE BOARDROOM: "${crown.question}"\n${window.location.origin}/profile/${projectKey}`
+        : `👑 The crowd just crowned the best question on ${projectName} in THE BOARDROOM: "${crown.question}"\n${window.location.origin}/profile/${projectKey}`;
+      await navigator.clipboard.writeText(text);
+      setCrownCopied(true);
+      setTimeout(() => setCrownCopied(false), 1800);
+    } catch {
+      // Clipboard access can be denied by the browser — no fallback
+      // worth building for a "nice to have" share affordance.
+    }
+  };
+
+  const allItems: FeedItem[] = [
     ...qa.map((q) => ({
       id: q.id,
       asker: q.asker,
@@ -44,7 +63,11 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
     .map((item) => ({ ...item, upvotes: item.upvotes + (qaUpvotes[item.id] ? 1 : 0) }))
     .sort((a, b) => b.upvotes - a.upvotes);
 
-  const answeredCount = items.filter((q) => q.answer).length;
+  // The crowned question gets its own pinned card up top instead of
+  // sitting wherever its upvote count happens to sort it — winning a
+  // battle is a bigger deal than the ▲ count alone.
+  const items = allItems.filter((item) => item.id !== crown?.questionId);
+  const answeredCount = allItems.filter((q) => q.answer).length;
 
   const post = () => {
     const text = draft.trim();
@@ -62,9 +85,19 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
           ASK THE TEAM
         </div>
         <div className="font-mono text-[11px] text-board-tertiary">
-          {answeredCount} of {items.length} answered
+          {answeredCount} of {allItems.length} answered
         </div>
       </div>
+
+      <QaBattle
+        projectKey={projectKey}
+        candidates={allItems.map((item) => ({
+          id: item.id,
+          question: item.question,
+          asker: item.asker,
+          upvotes: item.upvotes,
+        }))}
+      />
 
       <div className="mb-5.5 border border-board-border-alt bg-board-card-alt p-4.5">
         <textarea
@@ -95,7 +128,31 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
       </div>
 
       <div className="flex flex-col gap-2.5">
-        {items.length === 0 && (
+        {crown && (
+          <div
+            className="flex items-center gap-3 border-2 border-board-lime bg-[#141A06] p-4.5"
+            style={{ animation: "board-stampin-flat 500ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+          >
+            <span className="flex-none text-[22px] leading-none">👑</span>
+            <div className="min-w-0 flex-1">
+              <div className="font-mono text-[9px] font-extrabold tracking-[0.12em] text-board-lime">
+                CROWNED · BEST QUESTION
+              </div>
+              <div className="mt-1.5 font-mono text-[13px] font-bold leading-[1.5] text-board-heading">
+                &quot;{crown.question}&quot;
+              </div>
+              <div className="mt-1 font-mono text-[9px] text-board-tertiary">asked by {crown.asker}</div>
+            </div>
+            <button
+              type="button"
+              onClick={shareCrown}
+              className="flex-none whitespace-nowrap border border-board-lime px-3 py-2 font-mono text-[9px] font-extrabold tracking-[0.08em] text-board-lime transition hover:bg-[#1B2308]"
+            >
+              {crownCopied ? "COPIED ✓" : "SHARE THIS WIN ↗"}
+            </button>
+          </div>
+        )}
+        {allItems.length === 0 && (
           <div className="border border-board-border-alt bg-board-card-alt p-4.5 font-mono text-[11px] text-board-tertiary">
             No questions yet. Be the first — the answer goes on the permanent record.
           </div>

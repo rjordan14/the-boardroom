@@ -1,17 +1,34 @@
+import Link from "next/link";
+import type { Project, QaItem } from "@/lib/types";
+
 const FEED_ITEMS = [
   <>0x8f2…c41 clocked in to <b className="text-board-heading">ROOM 01</b></>,
-  <>R03 <b className="text-board-heading">answer posted</b></>,
   <>1,204 ballots sealed in <b className="text-board-heading">ROOM 01</b></>,
   <>the room started chanting again</>,
-  <>question asked on <b className="text-board-heading">VAULTMOUSE</b></>,
   <>0x4b1…9de clocked out of <b className="text-board-heading">ROOM 04</b></>,
   <>integrity check queued</>,
 ];
 
-function FeedContent() {
+/** A hot question, wherever it lives, reads as more worth clicking into
+ *  than "the room started chanting again" — mixing real cross-room Q&A
+ *  data into the ambient ticker (rather than a second scrolling row)
+ *  keeps one always-visible spot doing the work, and gives it somewhere
+ *  to actually go. */
+function hotQuestionItem(q: QaItem, project: Project) {
+  return (
+    <Link href={`/profile/${project.key}`} className="transition hover:text-board-lime">
+      🔥 {q.upvotes}{" "}
+      <b className="text-board-heading">{project.name}</b> · &quot;
+      {q.question.length > 46 ? `${q.question.slice(0, 46)}…` : q.question}
+      &quot;
+    </Link>
+  );
+}
+
+function FeedContent({ items }: { items: React.ReactNode[] }) {
   return (
     <div className="flex flex-none whitespace-nowrap pl-4 font-mono text-[11px] text-board-tertiary">
-      {FEED_ITEMS.map((item, i) => (
+      {items.map((item, i) => (
         <span key={i} className="pr-4">
           {item} ·
         </span>
@@ -20,7 +37,18 @@ function FeedContent() {
   );
 }
 
-export function ActivityTicker() {
+export function ActivityTicker({
+  hotQuestions = [],
+}: {
+  hotQuestions?: { question: QaItem; project: Project }[];
+}) {
+  const items: React.ReactNode[] = [];
+  FEED_ITEMS.forEach((item, i) => {
+    items.push(item);
+    const hot = hotQuestions[i];
+    if (hot) items.push(hotQuestionItem(hot.question, hot.project));
+  });
+
   return (
     <div className="flex items-center overflow-hidden border-b border-[#161914] bg-[#0A130C]">
       <div className="flex flex-none items-center gap-1.5 border-r border-[#1F3A22] px-4 py-3 font-mono text-[10px] font-bold tracking-[0.14em] text-board-success">
@@ -30,8 +58,8 @@ export function ActivityTicker() {
       <div className="flex-1 overflow-hidden py-3">
         <div className="flex w-max animate-[board-marquee_42s_linear_infinite]">
           {/* Two copies back-to-back so the -50% marquee loop has no visible seam. */}
-          <FeedContent />
-          <FeedContent />
+          <FeedContent items={items} />
+          <FeedContent items={items} />
         </div>
       </div>
     </div>

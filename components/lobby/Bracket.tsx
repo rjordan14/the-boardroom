@@ -1,5 +1,6 @@
 import type { Project, Room } from "@/lib/types";
 import { getResult } from "@/lib/mock/results";
+import { EliminatedIcon, EliminatedLabel } from "./EliminationFall";
 
 /**
  * Seed numbers are decorative bracket-position labels, not derived from
@@ -141,11 +142,13 @@ function QFColumn({
 }) {
   const a = projects[room.projectA];
   const b = projects[room.projectB];
+  const result = getResult(room.id);
+  const loserKey = result ? (result.winnerKey === a.key ? b.key : a.key) : null;
   return (
     <div className={`flex items-center ${reverse ? "flex-row-reverse" : ""}`}>
       <div className="flex flex-1 flex-col gap-1.5">
-        <QFEntry project={a} seed={seeds[0]} reverse={reverse} />
-        <QFEntry project={b} seed={seeds[1]} reverse={reverse} />
+        <QFEntry project={a} seed={seeds[0]} reverse={reverse} eliminated={a.key === loserKey} />
+        <QFEntry project={b} seed={seeds[1]} reverse={reverse} eliminated={b.key === loserKey} />
       </div>
       <div
         className="my-5 w-[22px] self-stretch border border-board-border"
@@ -156,17 +159,43 @@ function QFColumn({
   );
 }
 
-function QFEntry({ project, seed, reverse }: { project: Project; seed: number; reverse?: boolean }) {
+function QFEntry({
+  project,
+  seed,
+  reverse,
+  eliminated,
+}: {
+  project: Project;
+  seed: number;
+  reverse?: boolean;
+  eliminated?: boolean;
+}) {
   return (
     <div
-      className={`flex items-center gap-2.5 border border-board-border bg-board-card-alt px-3 py-2.5 transition hover:bg-[#151A11] ${
-        reverse ? "flex-row-reverse text-right" : ""
-      }`}
-      style={reverse ? { borderRight: "3px solid #CCFF00" } : { borderLeft: "3px solid #CCFF00" }}
+      className={`flex items-center gap-2.5 border px-3 py-2.5 transition ${
+        eliminated ? "border-[#2A241E] bg-[#0E0C09]" : "border-board-border bg-board-card-alt hover:bg-[#151A11]"
+      } ${reverse ? "flex-row-reverse text-right" : ""}`}
+      style={
+        eliminated
+          ? reverse
+            ? { borderRight: "3px solid #5C3A2E" }
+            : { borderLeft: "3px solid #5C3A2E" }
+          : reverse
+            ? { borderRight: "3px solid #CCFF00" }
+            : { borderLeft: "3px solid #CCFF00" }
+      }
     >
       <span className="w-3 font-mono text-[10px] font-bold text-board-disabled">{seed}</span>
-      <img src={project.mark} alt="" className="h-[22px] w-[22px] flex-none" />
-      <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
+      {eliminated ? (
+        <EliminatedIcon mark={project.mark} size={22} />
+      ) : (
+        <img src={project.mark} alt="" className="h-[22px] w-[22px] flex-none" />
+      )}
+      {eliminated ? (
+        <EliminatedLabel project={project} />
+      ) : (
+        <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
+      )}
     </div>
   );
 }

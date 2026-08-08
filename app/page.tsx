@@ -1,7 +1,9 @@
 import Link from "next/link";
+import type { Project } from "@/lib/types";
 import { listRooms } from "@/lib/api/rooms";
 import { listProjects } from "@/lib/api/projects";
 import { listFloorPreview } from "@/lib/api/floor";
+import { listAllQa } from "@/lib/api/qa";
 import { Header, WalletChip } from "@/components/ui/Header";
 import { Hero } from "@/components/lobby/Hero";
 import { ExplainerSteps } from "@/components/lobby/ExplainerSteps";
@@ -17,12 +19,18 @@ import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 
 export default async function LobbyPage() {
-  const [rooms, projectList, floorQuestions] = await Promise.all([
+  const [rooms, projectList, floorQuestions, allQa] = await Promise.all([
     listRooms(),
     listProjects(),
     listFloorPreview(),
+    listAllQa(),
   ]);
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
+  const hotQuestions = [...allQa]
+    .sort((a, b) => b.upvotes - a.upvotes)
+    .slice(0, 4)
+    .map((question) => ({ question, project: projects[question.projectKey] }))
+    .filter((h): h is { question: (typeof allQa)[number]; project: Project } => Boolean(h.project));
   const firstOpen = rooms.find((r) => r.status === "open") ?? rooms[0];
   const openRooms = rooms.filter((r) => r.status === "open");
   const roundComplete = openRooms.length === 0;
@@ -53,7 +61,7 @@ export default async function LobbyPage() {
           <VotingBackingExplainer />
         </div>
 
-        <ActivityTicker />
+        <ActivityTicker hotQuestions={hotQuestions} />
 
         <div className="px-[clamp(14px,4vw,48px)] pt-12">
           <div className="flex flex-wrap items-end justify-between gap-4">

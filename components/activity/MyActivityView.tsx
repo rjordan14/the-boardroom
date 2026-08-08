@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import type { Project, Room } from "@/lib/types";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
@@ -13,6 +14,26 @@ export function MyActivityView({
 }) {
   const ballotChoice = useBoardroomStore((s) => s.ballotChoice);
   const backing = useBoardroomStore((s) => s.backing);
+  const points = useBoardroomStore((s) => s.points);
+  const crowns = useBoardroomStore((s) => s.crowns);
+  const [recapCopied, setRecapCopied] = useState(false);
+
+  const roomsVoted = Object.keys(ballotChoice).length;
+  const crownsWon = Object.values(crowns).filter((c) => c.asker === "you").length;
+
+  const shareRecap = async () => {
+    try {
+      const text = `📊 My season on THE BOARDROOM so far: ${points} pts · ${roomsVoted} room${roomsVoted === 1 ? "" : "s"} voted${
+        crownsWon ? ` · ${crownsWon} question${crownsWon === 1 ? "" : "s"} crowned 👑` : ""
+      }\n${window.location.origin}`;
+      await navigator.clipboard.writeText(text);
+      setRecapCopied(true);
+      setTimeout(() => setRecapCopied(false), 1800);
+    } catch {
+      // Clipboard access can be denied by the browser — no fallback
+      // worth building for a "nice to have" share affordance.
+    }
+  };
 
   const rows = rooms
     .map((room) => {
@@ -29,6 +50,27 @@ export function MyActivityView({
       <div className="mt-2 font-mono text-[12px] leading-[1.7] text-board-secondary">
         Every room you&apos;ve sealed a ballot in or backed, this session.
       </div>
+
+      {points > 0 && (
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-2 border-board-lime bg-[#0F1407] p-4.5">
+          <div>
+            <div className="font-mono text-[9px] font-extrabold tracking-[0.14em] text-board-lime">
+              MY SEASON SO FAR
+            </div>
+            <div className="mt-1.5 font-mono text-[13px] font-bold text-board-heading">
+              ⭐ {points} pts · {roomsVoted} room{roomsVoted === 1 ? "" : "s"} voted
+              {crownsWon > 0 ? ` · 👑 ${crownsWon} crowned` : ""}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={shareRecap}
+            className="flex-none whitespace-nowrap border-2 border-board-lime bg-[#141A06] px-4 py-2.5 font-mono text-[10px] font-extrabold tracking-[0.08em] text-board-lime transition hover:bg-[#1B2308]"
+          >
+            {recapCopied ? "COPIED ✓" : "SHARE MY SEASON ↗"}
+          </button>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <div className="mt-6 flex flex-col items-center gap-4 border-2 border-dashed border-[#3D4536] bg-board-card-alt px-6 py-16 text-center">

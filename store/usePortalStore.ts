@@ -31,6 +31,20 @@ export type VideoUploadState =
   | "rejected"
   | "errored";
 
+export interface VideoAnswerState {
+  state: VideoUploadState;
+  progress: number;
+  playbackId: string | null;
+  message: string | null;
+}
+
+const IDLE_VIDEO_ANSWER: VideoAnswerState = {
+  state: "idle",
+  progress: 0,
+  playbackId: null,
+  message: null,
+};
+
 interface PortalState {
   gate: "locked" | "open";
   connectProject: () => void;
@@ -69,6 +83,16 @@ interface PortalState {
     message: string | null;
   }>) => void;
   resetVideoUpload: () => void;
+
+  /** Same shape as the pitch-video upload above, but one per question —
+   *  a founder can record a quick video reply to a hot question instead
+   *  of (or alongside) typing one. Keyed by QaItem.id. */
+  videoAnswers: Record<string, VideoAnswerState>;
+  setVideoAnswer: (id: string, partial: Partial<VideoAnswerState>) => void;
+  resetVideoAnswer: (id: string) => void;
+  /** Mock-fallback notice, per question, mirroring `uploadedNotice`. */
+  videoAnswerNotices: Record<string, boolean>;
+  triggerVideoAnswerUpload: (id: string) => void;
 
   infoSaved: boolean;
   saveInfo: () => void;
@@ -126,6 +150,33 @@ export const usePortalStore = create<PortalState>((set) => ({
       videoPlaybackId: null,
       videoStatusMessage: null,
     }),
+
+  videoAnswers: {},
+  setVideoAnswer: (id, partial) =>
+    set((s) => {
+      const current = s.videoAnswers[id] ?? IDLE_VIDEO_ANSWER;
+      return {
+        videoAnswers: {
+          ...s.videoAnswers,
+          [id]: {
+            state: partial.state ?? current.state,
+            progress: partial.progress ?? current.progress,
+            playbackId: partial.playbackId !== undefined ? partial.playbackId : current.playbackId,
+            message: partial.message !== undefined ? partial.message : current.message,
+          },
+        },
+      };
+    }),
+  resetVideoAnswer: (id) =>
+    set((s) => {
+      const rest = { ...s.videoAnswers };
+      delete rest[id];
+      return { videoAnswers: rest };
+    }),
+
+  videoAnswerNotices: {},
+  triggerVideoAnswerUpload: (id) =>
+    set((s) => ({ videoAnswerNotices: { ...s.videoAnswerNotices, [id]: true } })),
 
   infoSaved: false,
   saveInfo: () => set({ infoSaved: true }),

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { PointsChip } from "@/components/ui/PointsChip";
 
 export function Header({
   left,
@@ -18,6 +19,7 @@ export function Header({
       </Link>
       {left}
       <div className="ml-auto flex items-center gap-3.5">
+        <PointsChip />
         <Link
           href="/apply"
           className="border border-board-border-alt px-3.5 py-2.5 font-mono text-[10px] font-bold tracking-[0.1em] text-board-secondary transition hover:border-board-lime hover:text-board-lime"
