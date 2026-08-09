@@ -7,7 +7,7 @@ import { usePortalStore } from "@/store/usePortalStore";
 const POLL_INTERVAL_MS = 2000;
 const POLL_MAX_ATTEMPTS = 30; // ~60s of polling after upload finishes
 
-export function VideoTab() {
+export function VideoTab({ projectKey }: { projectKey: string }) {
   const uploadedNotice = usePortalStore((s) => s.uploadedNotice);
   const triggerUpload = usePortalStore((s) => s.triggerUpload);
   const videoUploadState = usePortalStore((s) => s.videoUploadState);
@@ -51,7 +51,11 @@ export function VideoTab() {
       return;
     }
 
-    const res = await fetch("/api/mux/upload", { method: "POST" });
+    const res = await fetch("/api/mux/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "pitch", projectKey }),
+    });
     const data = await res.json();
 
     if (!data.configured) {

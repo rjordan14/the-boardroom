@@ -17,18 +17,72 @@ export type UploadStatus =
   | { state: "rejected"; reason: string; durationSeconds: number }
   | { state: "errored"; message: string };
 
-const uploads = new Map<string, UploadStatus>();
+/** "pitch" uploads (VideoTab.tsx) surface in Admin's Submissions queue
+ *  once ready — see listReadyPitchUploads below. "qa-answer" uploads
+ *  (VideoAnswerRecorder.tsx) don't; they're a per-question reply, not
+ *  a new pitch to review. */
+export type UploadKind = "pitch" | "qa-answer";
 
-export function initUpload(uploadId: string): void {
+interface UploadContext {
+  kind: UploadKind;
+  projectKey?: string;
+  questionId?: string;
+}
+
+const uploads = new Map<string, UploadStatus>();
+const contexts = new Map<string, UploadContext>();
+// Separate from UploadStatus itself so decideReadyStatus (below) can
+// stay a pure function of its inputs — its own tests assert an exact
+// return shape, and a timestamp inside it would make that assertion
+// depend on wall-clock time.
+const readyAt = new Map<string, number>();
+
+export function initUpload(uploadId: string, context: UploadContext = { kind: "pitch" }): void {
   uploads.set(uploadId, { state: "waiting" });
+  contexts.set(uploadId, context);
 }
 
 export function setUploadStatus(uploadId: string, status: UploadStatus): void {
   uploads.set(uploadId, status);
+  if (status.state === "ready") readyAt.set(uploadId, Date.now());
 }
 
 export function getUploadStatus(uploadId: string): UploadStatus | undefined {
   return uploads.get(uploadId);
+}
+
+export interface ReadyPitchUpload {
+  uploadId: string;
+  projectKey: string;
+  assetId: string;
+  playbackId: string;
+  durationSeconds: number;
+  readyAt: number;
+}
+
+/** Every completed, ready pitch upload — what Admin's Submissions
+ *  queue merges in alongside its mock seed data (see
+ *  lib/api/submissions.ts). Same ephemeral-in-memory caveat as the
+ *  rest of this module: gone on server restart, and on a serverless
+ *  deploy, only reliable if the webhook and this read land on the
+ *  same warm instance — real persistence is the eventual fix, not
+ *  attempted here. */
+export function listReadyPitchUploads(): ReadyPitchUpload[] {
+  const results: ReadyPitchUpload[] = [];
+  for (const [uploadId, status] of uploads) {
+    if (status.state !== "ready") continue;
+    const context = contexts.get(uploadId);
+    if (!context || context.kind !== "pitch" || !context.projectKey) continue;
+    results.push({
+      uploadId,
+      projectKey: context.projectKey,
+      assetId: status.assetId,
+      playbackId: status.playbackId,
+      durationSeconds: status.durationSeconds,
+      readyAt: readyAt.get(uploadId) ?? Date.now(),
+    });
+  }
+  return results;
 }
 
 /**

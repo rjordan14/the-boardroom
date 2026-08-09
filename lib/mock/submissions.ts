@@ -5,6 +5,10 @@ export interface Submission {
   projectKey: ProjectKey;
   when: string;
   length: string;
+  /** Present only for a real Mux upload (see lib/api/submissions.ts) —
+   *  absent for this file's mock seed rows. */
+  assetId?: string;
+  playbackId?: string;
 }
 
 // Lengths match each project's pitchSeconds in lib/mock/projects.ts.

@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { decideReadyStatus, getUploadStatus, initUpload, MAX_PITCH_SECONDS, setUploadStatus } from "./store";
+import {
+  decideReadyStatus,
+  getUploadStatus,
+  initUpload,
+  listReadyPitchUploads,
+  MAX_PITCH_SECONDS,
+  setUploadStatus,
+} from "./store";
 
 // Module-level Map with no reset hook (by design — it's a thin
 // production wrapper, not worth adding test-only exports to). Each
@@ -72,5 +79,41 @@ describe("decideReadyStatus", () => {
   it("treats a ready event with no playback id yet as still waiting, not an error", () => {
     const result = decideReadyStatus({ assetId: "asset-5", durationSeconds: 60, playbackId: undefined });
     expect(result).toEqual({ state: "waiting" });
+  });
+});
+
+describe("listReadyPitchUploads", () => {
+  it("includes a ready pitch upload with its project context", () => {
+    initUpload("p1", { kind: "pitch", projectKey: "B" });
+    setUploadStatus("p1", { state: "ready", assetId: "asset-p1", playbackId: "pb-p1", durationSeconds: 45 });
+
+    const found = listReadyPitchUploads().find((u) => u.uploadId === "p1");
+    expect(found).toMatchObject({
+      uploadId: "p1",
+      projectKey: "B",
+      assetId: "asset-p1",
+      playbackId: "pb-p1",
+      durationSeconds: 45,
+    });
+    expect(typeof found?.readyAt).toBe("number");
+  });
+
+  it("excludes a qa-answer upload even once ready — it's a reply, not a new pitch", () => {
+    initUpload("p2", { kind: "qa-answer", questionId: "A-1" });
+    setUploadStatus("p2", { state: "ready", assetId: "asset-p2", playbackId: "pb-p2", durationSeconds: 20 });
+
+    expect(listReadyPitchUploads().find((u) => u.uploadId === "p2")).toBeUndefined();
+  });
+
+  it("excludes a pitch upload that isn't ready yet", () => {
+    initUpload("p3", { kind: "pitch", projectKey: "C" });
+
+    expect(listReadyPitchUploads().find((u) => u.uploadId === "p3")).toBeUndefined();
+  });
+
+  it("excludes an upload with no recorded context (defensive — shouldn't happen via initUpload)", () => {
+    setUploadStatus("p4-untracked", { state: "ready", assetId: "asset-p4", playbackId: "pb-p4", durationSeconds: 30 });
+
+    expect(listReadyPitchUploads().find((u) => u.uploadId === "p4-untracked")).toBeUndefined();
   });
 });

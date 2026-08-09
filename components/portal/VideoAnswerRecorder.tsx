@@ -52,7 +52,11 @@ export function VideoAnswerRecorder({ questionId }: { questionId: string }) {
       return;
     }
 
-    const res = await fetch("/api/mux/upload", { method: "POST" });
+    const res = await fetch("/api/mux/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "qa-answer", questionId }),
+    });
     const data = await res.json();
 
     if (!data.configured) {
