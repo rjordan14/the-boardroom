@@ -91,23 +91,40 @@ export function Bracket({
         {rooms.map((room) => {
           const a = projects[room.projectA];
           const b = projects[room.projectB];
+          const result = getResult(room.id);
+          const loserKey = result ? (result.winnerKey === a.key ? b.key : a.key) : null;
           return (
             <div key={room.id} className="border border-board-border-alt bg-board-card-alt">
               <div className="border-b border-board-border-alt px-3 py-2 font-mono text-[9px] font-bold tracking-[0.16em] text-board-tertiary">
                 QF{room.id}
               </div>
               <div className="flex flex-col gap-1 p-2">
-                {[a, b].map((p) => (
-                  <Link
-                    key={p.key}
-                    href={`/profile/${p.key}`}
-                    className="flex items-center gap-2.5 border border-board-border-alt bg-board-card px-3 py-2 transition hover:bg-[#151A11]"
-                    style={{ borderLeft: "3px solid #CCFF00" }}
-                  >
-                    <img src={p.mark} alt="" className="h-[22px] w-[22px]" />
-                    <span className="font-mono text-[11px] font-bold text-board-body">{p.name}</span>
-                  </Link>
-                ))}
+                {[a, b].map((p) => {
+                  const eliminated = p.key === loserKey;
+                  return (
+                    <Link
+                      key={p.key}
+                      href={`/profile/${p.key}`}
+                      className={`flex items-center gap-2.5 border px-3 py-2 transition ${
+                        eliminated
+                          ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]"
+                          : "border-board-border-alt bg-board-card hover:bg-[#151A11]"
+                      }`}
+                      style={{ borderLeft: eliminated ? "3px solid #5C3A2E" : "3px solid #CCFF00" }}
+                    >
+                      {eliminated ? (
+                        <EliminatedIcon mark={p.mark} size={22} />
+                      ) : (
+                        <img src={p.mark} alt="" className="h-[22px] w-[22px]" />
+                      )}
+                      {eliminated ? (
+                        <EliminatedLabel project={p} />
+                      ) : (
+                        <span className="font-mono text-[11px] font-bold text-board-body">{p.name}</span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           );
