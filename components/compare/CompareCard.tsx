@@ -74,19 +74,24 @@ export function CompareCard({
           // DOXXED X handles, VIEW FULL PROFILE) that stopPropagation
           // their own clicks so they don't also register a pick — which
           // means large parts of the card's visual center aren't
-          // reliable click targets for voting. This checkbox is the one
+          // reliable click targets for voting. This button is the one
           // spot on the card guaranteed to always pick/unpick, whatever
-          // else changes about the surrounding content.
-          className="ml-auto flex h-6.5 w-6.5 flex-none items-center justify-center border-2 transition hover:scale-110"
-          style={{ borderColor: picked ? "#CCFF00" : "#2C3327", background: picked ? "#CCFF00" : "transparent" }}
+          // else changes about the surrounding content — labeled with
+          // text rather than a bare checkbox glyph so it doesn't need to
+          // be inferred.
+          className="ml-auto flex flex-none items-center gap-1.5 whitespace-nowrap border-2 px-3 py-2 font-mono text-[10px] font-extrabold tracking-[0.06em] transition hover:scale-105"
+          style={{
+            borderColor: picked ? "#CCFF00" : "#4A5540",
+            background: picked ? "#CCFF00" : "transparent",
+            color: picked ? "#08090A" : "#8CA05A",
+          }}
         >
-          {picked && (
-            <span
-              className="font-mono text-[15px] font-extrabold leading-none text-board-bg"
-              style={{ animation: "board-check-pop 380ms cubic-bezier(0.3,1.6,0.4,1) both" }}
-            >
-              ✓
+          {picked ? (
+            <span style={{ animation: "board-check-pop 380ms cubic-bezier(0.3,1.6,0.4,1) both" }}>
+              ✓ VOTED
             </span>
+          ) : (
+            "VOTE →"
           )}
         </button>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { Comment, ProjectKey } from "@/lib/types";
 
 interface WatchProgress {
@@ -148,7 +149,14 @@ export interface Crown {
   wonAt: number;
 }
 
-export const useBoardroomStore = create<BoardroomState>((set, get) => ({
+// Persisted to localStorage — this is a wallet's whole session (votes,
+// watch progress, comments, points…), and losing it on an ordinary
+// page refresh made "did I already vote here?" impossible to answer
+// after the fact. No real backend exists behind any of this yet, so
+// the browser's own storage is the only record there is.
+export const useBoardroomStore = create<BoardroomState>()(
+  persist(
+    (set, get) => ({
   watchProgress: {},
   setWatchProgress: (roomId, key, value) =>
     set((state) => ({
@@ -327,7 +335,24 @@ export const useBoardroomStore = create<BoardroomState>((set, get) => ({
       get().awardPoints(10, "Backed the winning question");
     }
   },
-}));
+    }),
+    {
+      name: "boardroom-store",
+      // Throwing (rather than just returning undefined) when storage
+      // isn't there lets createJSONStorage's own try/catch take over and
+      // fall back to an in-memory no-op — the test environment's jsdom
+      // doesn't provide window.localStorage at all, and a real browser
+      // can throw accessing it in some private-browsing modes; either
+      // way this should degrade to "just don't persist," not crash.
+      storage: createJSONStorage(() => {
+        if (typeof window === "undefined" || !window.localStorage) {
+          throw new Error("localStorage unavailable");
+        }
+        return window.localStorage;
+      }),
+    }
+  )
+);
 
 export function getRoomProgress(
   progress: Record<string, WatchProgress>,

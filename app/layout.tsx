@@ -20,6 +20,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${jetbrainsMono.variable} h-full`}>
       <body className="min-h-full font-mono antialiased">
         <Providers>{children}</Providers>
+        <div className="pointer-events-none fixed bottom-2 right-2.5 z-30 text-right font-mono text-[9px] leading-[1.6] text-[#3A4033]">
+          <div>a Ronald Jorlin website</div>
+          <div>
+            webmaster and{" "}
+            <a
+              href="https://www.ultimate-hoff-fan-club.net/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pointer-events-auto underline decoration-dotted transition hover:text-board-lime"
+            >
+              chief hoffster
+            </a>
+          </div>
+        </div>
       </body>
     </html>
   );

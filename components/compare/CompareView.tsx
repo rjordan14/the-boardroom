@@ -69,7 +69,11 @@ export function CompareView({
         </div>
       </div>
 
-      <div className="flex flex-wrap items-stretch gap-4 px-[clamp(14px,4vw,48px)] pt-7.5">
+      <div className="px-[clamp(14px,4vw,48px)] pt-5 font-mono text-[10px] font-bold tracking-[0.08em] text-board-lime">
+        ↓ TAP A PROJECT&apos;S VOTE BUTTON BELOW TO CHOOSE IT
+      </div>
+
+      <div className="flex flex-wrap items-stretch gap-4 px-[clamp(14px,4vw,48px)] pt-3.5">
         <CompareCard
           project={projectA}
           qa={qaByProject[projectA.key] ?? []}
