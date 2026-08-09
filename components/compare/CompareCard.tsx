@@ -69,7 +69,7 @@ export function CompareCard({
             onPick();
           }}
           aria-pressed={picked}
-          aria-label={picked ? `Remove vote for ${project.name}` : `Vote for ${project.name}`}
+          aria-label={picked ? `Deselect ${project.name}` : `Select ${project.name} to vote for`}
           // The card body has several nested links/buttons (mark image,
           // DOXXED X handles, VIEW FULL PROFILE) that stopPropagation
           // their own clicks so they don't also register a pick — which
@@ -85,7 +85,7 @@ export function CompareCard({
             className="font-mono text-[9px] font-extrabold tracking-[0.08em]"
             style={{ color: picked ? "#CCFF00" : "#8CA05A" }}
           >
-            {picked ? "VOTED" : "VOTE"}
+            {picked ? "SELECTED" : "VOTE"}
           </span>
           <span
             className="flex h-6.5 w-6.5 items-center justify-center border-2"

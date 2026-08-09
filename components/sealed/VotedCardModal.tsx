@@ -2,11 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { renderVotedCard } from "@/lib/utils/votedCard";
+import { VotedCardVisual } from "./VotedCardVisual";
 
-/** The on-screen preview IS the exported file — rendered once to a PNG
- *  blob, shown as an <img> from that same blob, then reused for
- *  download/share. No separate CSS mockup to keep visually in sync
- *  with what actually gets shared. */
+/** The live preview (VotedCardVisual) and the downloadable/shareable
+ *  file (rendered here) are two separate implementations on purpose —
+ *  see VotedCardVisual's own comment for why. The PNG render happens
+ *  in the background as soon as this opens, so it's usually ready by
+ *  the time someone's looked at the animated preview and decided to
+ *  share it. */
 export function VotedCardModal({
   projectName,
   roomId,
@@ -25,7 +28,7 @@ export function VotedCardModal({
   useEffect(() => {
     let cancelled = false;
     let url: string | null = null;
-    renderVotedCard({ projectName, roomId })
+    renderVotedCard({ projectName })
       .then((b) => {
         if (cancelled) return;
         url = URL.createObjectURL(b);
@@ -37,10 +40,10 @@ export function VotedCardModal({
       cancelled = true;
       if (url) URL.revokeObjectURL(url);
     };
-  }, [projectName, roomId]);
+  }, [projectName]);
 
   const fileName = `boardroom-i-voted-${projectName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.png`;
-  const caption = `🗳️ I just voted for ${projectName} in THE BOARDROOM (Room ${roomId}). Ballot sealed, results hidden until the round closes.\n${
+  const caption = `🗳️ I just voted for ${projectName} in THE BOARDROOM. Ballot sealed, results hidden until the round closes.\n${
     typeof window !== "undefined" ? window.location.origin : ""
   }/room/${roomId}/sealed`;
 
@@ -103,20 +106,7 @@ export function VotedCardModal({
         </div>
 
         <div className="p-5.5">
-          <div className="flex aspect-[1000/1300] w-full items-center justify-center border border-board-border-alt bg-[#05070B]">
-            {error ? (
-              <div className="p-6 text-center font-mono text-[11px] leading-[1.7] text-board-tertiary">
-                Couldn&apos;t build the card. Try again in a moment.
-              </div>
-            ) : imgUrl ? (
-              <img src={imgUrl} alt={`I voted for ${projectName} in The Boardroom`} className="h-full w-full" />
-            ) : (
-              <div className="flex flex-col items-center gap-2 font-mono text-[11px] text-board-tertiary">
-                <span className="block h-2 w-2 animate-[board-pulse_1s_ease-in-out_infinite] rounded-full bg-board-lime" />
-                Building your card…
-              </div>
-            )}
-          </div>
+          <VotedCardVisual projectName={projectName} />
 
           <div className="mt-4 flex flex-col gap-2">
             <button
@@ -125,7 +115,7 @@ export function VotedCardModal({
               disabled={!imgUrl}
               className="w-full bg-board-lime py-3.5 text-center font-mono text-[12px] font-extrabold tracking-[0.1em] text-board-bg transition hover:bg-board-lime-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {shared ? "SHARED ✓" : "SHARE ↗"}
+              {shared ? "SHARED ✓" : imgUrl ? "SHARE ↗" : "PREPARING…"}
             </button>
             <div className="flex gap-2">
               <button
@@ -144,6 +134,11 @@ export function VotedCardModal({
                 {copied ? "COPIED ✓" : "COPY CAPTION"}
               </button>
             </div>
+            {error && (
+              <div className="text-center font-mono text-[10px] text-board-tertiary">
+                Couldn&apos;t prepare a downloadable file — the card above still works for a screenshot.
+              </div>
+            )}
           </div>
         </div>
       </div>

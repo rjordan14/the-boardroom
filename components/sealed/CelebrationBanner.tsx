@@ -124,13 +124,6 @@ export function CelebrationBanner() {
           />
         ))}
       </div>
-
-      <div
-        className="absolute left-[clamp(14px,4vw,48px)] bottom-3 font-mono text-[11px] font-bold tracking-[0.2em] text-board-lime"
-        style={{ animation: "board-pulse 2.2s infinite" }}
-      >
-        THE ROOM APPROVES
-      </div>
     </div>
   );
 }

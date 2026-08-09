@@ -6,7 +6,7 @@
  *  separate implementation to keep in sync. */
 
 const WIDTH = 1000;
-const HEIGHT = 1300;
+const HEIGHT = 1050;
 
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -89,13 +89,33 @@ function fitText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number, 
   return size;
 }
 
-export async function renderVotedCard({
-  projectName,
-  roomId,
-}: {
-  projectName: string;
-  roomId: string;
-}): Promise<Blob> {
+/** Centered word-wrap — assumes ctx.font/fillStyle/textAlign are
+ *  already set. `y` is the vertical center of the first line. */
+function wrapText(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  cx: number,
+  y: number,
+  maxWidth: number,
+  lineHeight: number
+) {
+  const words = text.split(" ");
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const attempt = current ? `${current} ${word}` : word;
+    if (ctx.measureText(attempt).width > maxWidth && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = attempt;
+    }
+  }
+  if (current) lines.push(current);
+  lines.forEach((line, i) => ctx.fillText(line, cx, y + i * lineHeight));
+}
+
+export async function renderVotedCard({ projectName }: { projectName: string }): Promise<Blob> {
   const canvas = document.createElement("canvas");
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
@@ -157,19 +177,19 @@ export async function renderVotedCard({
   ctx.restore();
 
   const nameText = projectName.toUpperCase();
-  const nameY = cy + avatarR + bandWidth / 2 + 92;
-  const nameSize = fitText(ctx, nameText, WIDTH - 140, 54);
+  const nameY = cy + avatarR + bandWidth / 2 + 96;
+  const nameSize = fitText(ctx, nameText, WIDTH - 140, 58);
   ctx.font = `bold ${nameSize}px monospace`;
   ctx.fillStyle = "#F5F7F0";
   ctx.fillText(nameText, cx, nameY);
 
-  ctx.fillStyle = "#8CA05A";
-  ctx.font = "22px monospace";
-  ctx.fillText(`IN THE BOARDROOM · ROOM ${roomId}`, cx, nameY + 48);
-
-  ctx.fillStyle = "#4A5540";
-  ctx.font = "16px monospace";
-  ctx.fillText("The community decides who launches.", cx, HEIGHT - 56);
+  // The hook for anyone seeing this card who has no idea what The
+  // Boardroom is — promoted from a bottom footnote to the card's
+  // second-biggest piece of text, since that's the line doing the work
+  // of explaining why this is worth looking at.
+  ctx.fillStyle = "#CCFF00";
+  ctx.font = "bold 34px monospace";
+  wrapText(ctx, "THE COMMUNITY DECIDES WHO LAUNCHES.", cx, nameY + 76, WIDTH - 200, 42);
 
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
