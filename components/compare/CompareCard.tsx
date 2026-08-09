@@ -62,8 +62,22 @@ export function CompareCard({
             {project.line}
           </div>
         </div>
-        <div
-          className="ml-auto flex h-6.5 w-6.5 flex-none items-center justify-center border-2"
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onPick();
+          }}
+          aria-pressed={picked}
+          aria-label={picked ? `Remove vote for ${project.name}` : `Vote for ${project.name}`}
+          // The card body has several nested links/buttons (mark image,
+          // DOXXED X handles, VIEW FULL PROFILE) that stopPropagation
+          // their own clicks so they don't also register a pick — which
+          // means large parts of the card's visual center aren't
+          // reliable click targets for voting. This checkbox is the one
+          // spot on the card guaranteed to always pick/unpick, whatever
+          // else changes about the surrounding content.
+          className="ml-auto flex h-6.5 w-6.5 flex-none items-center justify-center border-2 transition hover:scale-110"
           style={{ borderColor: picked ? "#CCFF00" : "#2C3327", background: picked ? "#CCFF00" : "transparent" }}
         >
           {picked && (
@@ -74,7 +88,7 @@ export function CompareCard({
               ✓
             </span>
           )}
-        </div>
+        </button>
       </div>
 
       <div className="grid grid-cols-[minmax(96px,130px)_1fr] gap-x-3.5 gap-y-2.5 font-mono text-[11px] leading-[1.6]">
@@ -106,7 +120,11 @@ export function CompareCard({
                 href={`https://x.com/${m.handle!.slice(1)}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
+                // No stopPropagation here (unlike the mark image/profile
+                // button, which open the modal instead of picking): this
+                // opens in a new tab, so letting the click also bubble up
+                // to onPick is harmless — and it keeps this part of the
+                // card's surface a reliable place to click to vote.
                 className="inline-flex items-center gap-1.5 border border-board-border bg-[#0C0F09] px-2.5 py-1.5 font-mono text-[10px] text-board-body transition hover:border-board-lime hover:text-board-lime"
               >
                 <span className="font-mono text-[11px] font-bold">X</span>

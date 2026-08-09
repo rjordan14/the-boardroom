@@ -208,7 +208,13 @@ export function RoomView({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#05070B]"
+                  // Needs to outrank the progress-bar overlay's z-[3] —
+                  // without an explicit z-index here this full-takeover
+                  // screen defaults to stacking below it, so at short box
+                  // heights (mobile) the progress bar visually and
+                  // click-wise sits on top of the advance button, and taps
+                  // on it silently do nothing.
+                  className="absolute inset-0 z-[5] flex flex-col items-center justify-center gap-4 bg-[#05070B]"
                 >
                   <div className="font-mono text-[11px] font-bold tracking-[0.2em] text-board-success">
                     PITCH COMPLETE · {project.name}
