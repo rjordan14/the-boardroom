@@ -8,6 +8,7 @@ import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { useEscrowBacking } from "@/lib/chain/hooks";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
 import { CelebrationBanner } from "./CelebrationBanner";
+import { VotedCardModal } from "./VotedCardModal";
 
 /** Season-1 backing minimum per README Decisions Locked #7 (888
  *  $STONKBROKER) — the prototype's own backing panel showed a stale
@@ -34,7 +35,7 @@ export function SealedView({
   const ballotChoice = useBoardroomStore((s) => s.ballotChoice);
   const { phase, escrow, reclaim } = useEscrowBacking(room.id);
   const [detailOpen, setDetailOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [shareCardOpen, setShareCardOpen] = useState(false);
 
   // Prefer an open room the wallet hasn't voted in yet, in bracket order —
   // falls back to any other open room, then to the lobby if the whole
@@ -44,20 +45,6 @@ export function SealedView({
       .filter((r) => r.id !== room.id && r.status === "open" && !ballotChoice[r.id])
       .sort((a, b) => a.n - b.n)[0] ??
     rooms.filter((r) => r.id !== room.id && r.status === "open").sort((a, b) => a.n - b.n)[0];
-
-  const handleShare = async () => {
-    try {
-      const link = `${window.location.origin}/room/${room.id}/sealed`;
-      await navigator.clipboard.writeText(
-        `🗳️ Just clocked into THE BOARDROOM — voted for ${chosenProject.name} in Room ${room.id}. Ballot sealed, results hidden until the round closes.\n${link}`
-      );
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1800);
-    } catch {
-      // Clipboard access can be denied by the browser — no fallback
-      // worth building for a "nice to have" share affordance.
-    }
-  };
 
   const amount = backingState?.amount ?? BACKING_PRESET_MID;
   const escrowed = backingState?.escrowed ?? false;
@@ -311,10 +298,10 @@ export function SealedView({
         </Link>
         <button
           type="button"
-          onClick={handleShare}
+          onClick={() => setShareCardOpen(true)}
           className="whitespace-nowrap border border-[#3D4536] px-6 py-4 font-mono text-[12px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
         >
-          {copied ? "LINK COPIED ✓" : "SHARE CARD ↗"}
+          SHARE CARD ↗
         </button>
         <Link
           href="/"
@@ -336,6 +323,14 @@ export function SealedView({
         </div>
       </div>
       </div>
+
+      {shareCardOpen && (
+        <VotedCardModal
+          projectName={chosenProject.name}
+          roomId={room.id}
+          onClose={() => setShareCardOpen(false)}
+        />
+      )}
     </div>
   );
 }

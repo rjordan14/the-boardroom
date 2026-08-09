@@ -74,25 +74,32 @@ export function CompareCard({
           // DOXXED X handles, VIEW FULL PROFILE) that stopPropagation
           // their own clicks so they don't also register a pick — which
           // means large parts of the card's visual center aren't
-          // reliable click targets for voting. This button is the one
-          // spot on the card guaranteed to always pick/unpick, whatever
-          // else changes about the surrounding content — labeled with
-          // text rather than a bare checkbox glyph so it doesn't need to
-          // be inferred.
-          className="ml-auto flex flex-none items-center gap-1.5 whitespace-nowrap border-2 px-3 py-2 font-mono text-[10px] font-extrabold tracking-[0.06em] transition hover:scale-105"
-          style={{
-            borderColor: picked ? "#CCFF00" : "#4A5540",
-            background: picked ? "#CCFF00" : "transparent",
-            color: picked ? "#08090A" : "#8CA05A",
-          }}
+          // reliable click targets for voting. This is the one spot on
+          // the card guaranteed to always pick/unpick, whatever else
+          // changes about the surrounding content — a labeled checkbox
+          // rather than an arrow, which read as "go somewhere" instead
+          // of "select this."
+          className="ml-auto flex flex-none flex-col items-center gap-1 transition hover:scale-105"
         >
-          {picked ? (
-            <span style={{ animation: "board-check-pop 380ms cubic-bezier(0.3,1.6,0.4,1) both" }}>
-              ✓ VOTED
-            </span>
-          ) : (
-            "VOTE →"
-          )}
+          <span
+            className="font-mono text-[9px] font-extrabold tracking-[0.08em]"
+            style={{ color: picked ? "#CCFF00" : "#8CA05A" }}
+          >
+            {picked ? "VOTED" : "VOTE"}
+          </span>
+          <span
+            className="flex h-6.5 w-6.5 items-center justify-center border-2"
+            style={{ borderColor: picked ? "#CCFF00" : "#4A5540", background: picked ? "#CCFF00" : "transparent" }}
+          >
+            {picked && (
+              <span
+                className="font-mono text-[15px] font-extrabold leading-none text-board-bg"
+                style={{ animation: "board-check-pop 380ms cubic-bezier(0.3,1.6,0.4,1) both" }}
+              >
+                ✓
+              </span>
+            )}
+          </span>
         </button>
       </div>
 

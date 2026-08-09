@@ -51,9 +51,6 @@ interface BoardroomState {
    *  clock-in/out times rather than elapsed playback duration). */
   watchStartedAt: Record<string, number>;
 
-  floorUpvotes: Record<string, boolean>;
-  toggleFloorUpvote: (questionId: string) => void;
-
   modalProjectKey: string | null;
   openProfileModal: (projectKey: string) => void;
   closeProfileModal: () => void;
@@ -170,15 +167,6 @@ export const useBoardroomStore = create<BoardroomState>()(
     })),
 
   watchStartedAt: {},
-
-  floorUpvotes: {},
-  toggleFloorUpvote: (questionId) =>
-    set((state) => ({
-      floorUpvotes: {
-        ...state.floorUpvotes,
-        [questionId]: !state.floorUpvotes[questionId],
-      },
-    })),
 
   modalProjectKey: null,
   openProfileModal: (projectKey) => set({ modalProjectKey: projectKey }),

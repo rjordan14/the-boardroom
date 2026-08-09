@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Project } from "@/lib/types";
 import { listRooms } from "@/lib/api/rooms";
 import { listProjects } from "@/lib/api/projects";
-import { listFloorPreview } from "@/lib/api/floor";
+import { listAllComments } from "@/lib/api/comments";
 import { listAllQa } from "@/lib/api/qa";
 import { Header, WalletChip } from "@/components/ui/Header";
 import { Hero } from "@/components/lobby/Hero";
@@ -19,10 +19,10 @@ import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 
 export default async function LobbyPage() {
-  const [rooms, projectList, floorQuestions, allQa] = await Promise.all([
+  const [rooms, projectList, floorComments, allQa] = await Promise.all([
     listRooms(),
     listProjects(),
-    listFloorPreview(),
+    listAllComments(),
     listAllQa(),
   ]);
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
@@ -124,7 +124,7 @@ export default async function LobbyPage() {
         </div>
 
         <div className="px-[clamp(14px,4vw,48px)] pt-8">
-          <FloorPreview questions={floorQuestions} projects={projects} />
+          <FloorPreview comments={floorComments} projects={projects} />
         </div>
 
         <div className="mt-8 flex flex-wrap justify-between gap-2 border-t border-[#161914] px-[clamp(14px,4vw,48px)] py-5 font-mono text-[11px] tracking-[0.08em] text-[#4A5540]">

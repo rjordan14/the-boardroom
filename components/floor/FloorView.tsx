@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Comment, Project, ProjectKey } from "@/lib/types";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
 import { formatRelativeTime } from "@/lib/utils/format";
@@ -9,6 +10,7 @@ import { formatRelativeTime } from "@/lib/utils/format";
 type SortMode = "recent" | "top";
 
 export function FloorView({ comments, projects }: { comments: Comment[]; projects: Project[] }) {
+  const router = useRouter();
   const postedComments = useBoardroomStore((s) => s.postedComments);
   const commentLikes = useBoardroomStore((s) => s.commentLikes);
   const toggleCommentLike = useBoardroomStore((s) => s.toggleCommentLike);
@@ -142,16 +144,36 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
           return (
             <div
               key={c.id}
-              className="flex gap-3.5 border border-board-border-alt bg-board-card-alt p-4"
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push(`/profile/${project.key}`)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  router.push(`/profile/${project.key}`);
+                }
+              }}
+              // Only the avatar/name links were clickable before — most
+              // of the card (the comment text itself, all the
+              // surrounding whitespace) was dead space that looked
+              // exactly as tappable as the rest of the row. Now the
+              // whole card goes to the project; the like button below
+              // stops propagation so liking doesn't also navigate away.
+              className="flex cursor-pointer gap-3.5 border border-board-border-alt bg-board-card-alt p-4 transition hover:border-[#3D4536]"
               style={isNew ? { animation: "board-eliminated-settle 400ms ease-out both" } : undefined}
             >
-              <Link href={`/profile/${project.key}`} className="flex-none transition hover:scale-110">
+              <Link
+                href={`/profile/${project.key}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex-none transition hover:scale-110"
+              >
                 <img src={project.mark} alt="" className="h-9 w-9" />
               </Link>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <Link
                     href={`/profile/${project.key}`}
+                    onClick={(e) => e.stopPropagation()}
                     className="font-mono text-[10px] font-extrabold tracking-[0.06em] text-board-lime transition hover:translate-x-0.5"
                   >
                     {project.name}
@@ -163,7 +185,12 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
               </div>
               <button
                 type="button"
-                onClick={() => toggleCommentLike(c.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  toggleCommentLike(c.id);
+                }}
+                aria-label={liked ? "Unlike this comment" : "Like this comment"}
+                title={liked ? "Unlike this comment" : "Like this comment"}
                 className={`flex flex-none items-center gap-1 self-start font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
                   liked ? "text-board-lime" : "text-board-secondary hover:text-board-lime"
                 }`}

@@ -20,7 +20,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${jetbrainsMono.variable} h-full`}>
       <body className="min-h-full font-mono antialiased">
         <Providers>{children}</Providers>
-        <div className="pointer-events-none fixed bottom-2 right-2.5 z-30 text-right font-mono text-[9px] leading-[1.6] text-[#3A4033]">
+        {/* Sits after {children} in normal document flow — the literal
+            last thing on every page, at the true bottom once you scroll
+            all the way down. A fixed-position badge here instead read as
+            floating text drifting over whatever content was underneath
+            it while scrolling, which is illegible and distracting. */}
+        <div className="border-t border-[#161914] px-[clamp(14px,4vw,48px)] py-5 text-center font-mono text-[9px] leading-[1.8] text-[#5C6653]">
           <div>a Ronald Jorlin website</div>
           <div>
             webmaster and{" "}
@@ -28,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               href="https://www.ultimate-hoff-fan-club.net/"
               target="_blank"
               rel="noopener noreferrer"
-              className="pointer-events-auto underline decoration-dotted transition hover:text-board-lime"
+              className="underline decoration-dotted transition hover:text-board-lime"
             >
               chief hoffster
             </a>

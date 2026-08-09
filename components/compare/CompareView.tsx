@@ -56,15 +56,13 @@ export function CompareView({
             sealed. Results stay hidden until the round closes.
           </div>
         </div>
-        <div className="flex items-center gap-3.5 bg-board-lime px-4.5 py-2.5 text-[#10140B] shadow-[0_3px_0_#82A200]">
-          <span className="block h-2 w-2 animate-[board-pulse_1.2s_ease-in-out_infinite] rounded-full bg-[#10140B]" />
-          <div>
-            <div className="font-mono text-[9px] font-extrabold tracking-[0.18em] opacity-70">
-              VOTE CLOSES
-            </div>
-            <div className="mt-1.5 font-mono text-[22px] font-extrabold tracking-[-0.01em]">
-              <CountdownTimer target={room.closesAt} />
-            </div>
+        <div className="bg-board-lime px-4.5 py-2.5 text-[#10140B] shadow-[0_3px_0_#82A200]">
+          <div className="flex items-center gap-2 font-mono text-[9px] font-extrabold tracking-[0.18em] opacity-70">
+            <span className="block h-2 w-2 animate-[board-pulse_1.2s_ease-in-out_infinite] rounded-full bg-[#10140B]" />
+            VOTE CLOSES
+          </div>
+          <div className="mt-1.5 font-mono text-[22px] font-extrabold tracking-[-0.01em]">
+            <CountdownTimer target={room.closesAt} />
           </div>
         </div>
       </div>
