@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { Project, Room } from "@/lib/types";
 import type { RoomResult } from "@/lib/mock/results";
 import { ProgressBar } from "@/components/ui/ProgressBar";
+import { useBoardroomStore } from "@/store/useBoardroomStore";
 
 export function ResultView({
   room,
@@ -19,6 +20,9 @@ export function ResultView({
 }) {
   const winnerTally = result.tallies[winner.key];
   const loserTally = result.tallies[loser.key];
+  const following = useBoardroomStore((s) => s.followedProjects[loser.key]);
+  const toggleFollow = useBoardroomStore((s) => s.toggleFollow);
+  const margin = winnerTally && loserTally ? Math.abs(winnerTally.pct - loserTally.pct) : null;
 
   return (
     <div>
@@ -47,6 +51,16 @@ export function ResultView({
           <div className="font-mono text-[13px] font-bold text-board-heading">
             ADVANCES TO THE SEMIFINALS
           </div>
+          {margin !== null && margin < 20 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.3 }}
+              className="border border-board-border-amber-alt bg-[#141109] px-3.5 py-1.5 font-mono text-[10px] font-extrabold tracking-[0.12em] text-board-amber"
+            >
+              {margin < 8 ? "⚡ NAIL-BITER" : "CLOSE RACE"} · {margin.toFixed(1)}-POINT MARGIN
+            </motion.div>
+          )}
         </div>
       </div>
 
@@ -98,12 +112,25 @@ export function ResultView({
             <Bullet>A permanent profile, pitch and tournament history</Bullet>
             <Bullet>An open invitation to Season 02</Bullet>
           </div>
-          <Link
-            href={`/profile/${loser.key}`}
-            className="mt-auto border border-[#3D4536] px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
-          >
-            FOLLOW {loser.name}
-          </Link>
+          <div className="mt-auto flex gap-2.5">
+            <button
+              type="button"
+              onClick={() => toggleFollow(loser.key)}
+              className={`flex-1 border px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.1em] transition ${
+                following
+                  ? "border-board-lime bg-[#141A06] text-board-lime"
+                  : "border-[#3D4536] text-board-body hover:border-board-lime hover:text-board-lime"
+              }`}
+            >
+              {following ? `✓ FOLLOWING ${loser.name}` : `FOLLOW ${loser.name}`}
+            </button>
+            <Link
+              href={`/profile/${loser.key}`}
+              className="flex-none border border-[#3D4536] px-4 py-3 text-center font-mono text-[11px] font-bold tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
+            >
+              PROFILE →
+            </Link>
+          </div>
         </div>
       </div>
 

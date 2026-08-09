@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Comment, Project, QaItem } from "@/lib/types";
 import { formatClock } from "@/lib/utils/format";
 import { QaFeed } from "@/components/profile/QaFeed";
@@ -7,10 +8,15 @@ export function ProjectProfileView({
   project,
   qa,
   comments,
+  roomId,
 }: {
   project: Project;
   qa: QaItem[];
   comments: Comment[];
+  /** Undefined only if this project somehow isn't paired into any
+   *  quarterfinal room — the thumbnail below falls back to
+   *  non-interactive rather than linking nowhere. */
+  roomId?: string;
 }) {
   return (
     <div className="mx-auto max-w-[1000px] px-[clamp(14px,4vw,48px)] py-10">
@@ -32,15 +38,30 @@ export function ProjectProfileView({
       </div>
 
       <div className="mt-7.5 flex flex-wrap items-center gap-5 border border-board-border-alt bg-board-card-alt p-5">
-        <div className="relative flex aspect-video w-[220px] flex-none items-center justify-center overflow-hidden border border-[#333D26] bg-gradient-to-br from-[#171B10] to-[#0A0D07]">
-          <div className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-board-lime/10 to-transparent" />
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-board-lime shadow-[0_3px_0_#82A200] transition hover:scale-105">
-            <span className="ml-1 h-0 w-0 border-y-8 border-l-[13px] border-y-transparent border-l-[#10140B]" />
+        {roomId ? (
+          <Link
+            href={`/room/${roomId}`}
+            className="group relative flex aspect-video w-[220px] flex-none items-center justify-center overflow-hidden border border-[#333D26] bg-gradient-to-br from-[#171B10] to-[#0A0D07] transition hover:border-board-lime"
+          >
+            <div className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-board-lime/10 to-transparent" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-board-lime shadow-[0_3px_0_#82A200] transition group-hover:scale-105">
+              <span className="ml-1 h-0 w-0 border-y-8 border-l-[13px] border-y-transparent border-l-[#10140B]" />
+            </div>
+            <div className="absolute bottom-2 left-2.5 font-mono text-[9px] font-bold text-board-body">
+              0:00 / {formatClock(project.pitchSeconds)}
+            </div>
+          </Link>
+        ) : (
+          <div className="relative flex aspect-video w-[220px] flex-none items-center justify-center overflow-hidden border border-[#333D26] bg-gradient-to-br from-[#171B10] to-[#0A0D07]">
+            <div className="absolute inset-x-0 top-0 h-[30%] bg-gradient-to-b from-board-lime/10 to-transparent" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-board-lime shadow-[0_3px_0_#82A200]">
+              <span className="ml-1 h-0 w-0 border-y-8 border-l-[13px] border-y-transparent border-l-[#10140B]" />
+            </div>
+            <div className="absolute bottom-2 left-2.5 font-mono text-[9px] font-bold text-board-body">
+              0:00 / {formatClock(project.pitchSeconds)}
+            </div>
           </div>
-          <div className="absolute bottom-2 left-2.5 font-mono text-[9px] font-bold text-board-body">
-            0:00 / {formatClock(project.pitchSeconds)}
-          </div>
-        </div>
+        )}
         <div>
           <div className="font-mono text-[11px] font-extrabold tracking-[0.14em] text-board-lime">
             BUILDER PITCH · {formatClock(project.pitchSeconds)}
@@ -49,6 +70,14 @@ export function ProjectProfileView({
             A founder from {project.name}, in their own words — no script, no editing, recorded in
             one take before the round opened.
           </div>
+          {roomId && (
+            <Link
+              href={`/room/${roomId}`}
+              className="mt-2.5 inline-flex items-center gap-1.5 font-mono text-[10px] font-bold tracking-[0.06em] text-board-lime transition hover:translate-x-0.5"
+            >
+              WATCH IN THE ROOM →
+            </Link>
+          )}
         </div>
       </div>
 

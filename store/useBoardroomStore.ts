@@ -97,6 +97,12 @@ interface BoardroomState {
   commentLikes: Record<string, boolean>;
   toggleCommentLike: (commentId: string) => void;
 
+  /** Keyed by projectKey — no real notifications behind this yet, but
+   *  it's a genuine toggle (not a dead click dressed as a Link, which
+   *  is what this replaced on the Result screen). */
+  followedProjects: Record<string, boolean>;
+  toggleFollow: (projectKey: string) => void;
+
   /** Cosmetic-only for now (leaderboard/profile flex) — see the
    *  session's points-system decision: never touches vote weight. */
   points: number;
@@ -257,6 +263,12 @@ export const useBoardroomStore = create<BoardroomState>((set, get) => ({
   toggleCommentLike: (commentId) =>
     set((state) => ({
       commentLikes: { ...state.commentLikes, [commentId]: !state.commentLikes[commentId] },
+    })),
+
+  followedProjects: {},
+  toggleFollow: (projectKey) =>
+    set((state) => ({
+      followedProjects: { ...state.followedProjects, [projectKey]: !state.followedProjects[projectKey] },
     })),
 
   points: 0,
