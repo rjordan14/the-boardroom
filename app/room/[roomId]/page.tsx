@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { getRoom } from "@/lib/api/rooms";
 import { getProject } from "@/lib/api/projects";
+import { getQaForProject } from "@/lib/api/qa";
 import { Header, BackLink } from "@/components/ui/Header";
 import { RoomView, RoomHeaderRight } from "@/components/room/RoomView";
 
@@ -27,6 +28,11 @@ export default async function RoomPage({
   ]);
   if (!projectA || !projectB) notFound();
 
+  const [qaA, qaB] = await Promise.all([
+    getQaForProject(projectA.key),
+    getQaForProject(projectB.key),
+  ]);
+
   return (
     <div data-screen="room">
       <Header
@@ -40,7 +46,7 @@ export default async function RoomPage({
         }
         right={<RoomHeaderRight room={room} />}
       />
-      <RoomView room={room} projectA={projectA} projectB={projectB} />
+      <RoomView room={room} projectA={projectA} projectB={projectB} qaByProject={{ [projectA.key]: qaA, [projectB.key]: qaB }} />
     </div>
   );
 }

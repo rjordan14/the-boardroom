@@ -36,6 +36,8 @@ const room: Room = {
   closesAt: "2026-08-09T22:00:00.000Z",
 };
 
+const qaByProject = { A: [], B: [] };
+
 const initialStoreState = useBoardroomStore.getState();
 
 beforeEach(() => {
@@ -49,7 +51,7 @@ afterEach(() => {
 
 describe("RoomView", () => {
   it("keeps the B tab disabled until A reaches 100%, then enables it", () => {
-    render(<RoomView room={room} projectA={projectA} projectB={projectB} />);
+    render(<RoomView room={room} projectA={projectA} projectB={projectB} qaByProject={qaByProject} />);
 
     // "VAULTMOUSE" also appears in the ballot-progress panel below the
     // tab bar — find the one that's actually inside the tab button.
@@ -74,7 +76,7 @@ describe("RoomView", () => {
     useBoardroomStore.getState().setWatchProgress(room.id, "pA", 100);
     useBoardroomStore.getState().setWatchProgress(room.id, "pB", 100);
 
-    render(<RoomView room={room} projectA={projectA} projectB={projectB} />);
+    render(<RoomView room={room} projectA={projectA} projectB={projectB} qaByProject={qaByProject} />);
 
     // Initial phase is derived from pA on mount (>=100 -> "done"), so the
     // completion button is present immediately without waiting on timers.
@@ -86,7 +88,7 @@ describe("RoomView", () => {
 
   it("simulated playback advances progress over time and reaches 100 without overshooting logic breaking", () => {
     vi.useFakeTimers();
-    render(<RoomView room={room} projectA={projectA} projectB={projectB} />);
+    render(<RoomView room={room} projectA={projectA} projectB={projectB} qaByProject={qaByProject} />);
 
     // door phase holds for 3820ms before playback starts — matches the
     // door+walker sequence's own timing (1320ms delay + 2500ms walk).

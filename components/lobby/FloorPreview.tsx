@@ -21,11 +21,17 @@ export function FloorPreview({
 
   return (
     <div className="border border-board-border-alt bg-board-card-alt p-5">
-      <div className="mb-4 flex items-baseline gap-3 font-mono text-[14px] font-extrabold tracking-[0.06em] text-board-heading">
+      <div className="mb-4 flex flex-wrap items-baseline gap-3 font-mono text-[14px] font-extrabold tracking-[0.06em] text-board-heading">
         FROM THE FLOOR
         <span className="font-mono text-[10px] font-normal tracking-normal text-board-tertiary">
           tap to expand · ▲ to upvote
         </span>
+        <Link
+          href="/floor"
+          className="ml-auto font-mono text-[10px] font-bold tracking-[0.08em] text-board-lime transition hover:translate-x-0.5"
+        >
+          VIEW ALL →
+        </Link>
       </div>
       <div className="grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-3">
         {questions.map((q) => {

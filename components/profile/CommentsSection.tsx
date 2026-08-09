@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { Comment, ProjectKey } from "@/lib/types";
 import { useBoardroomStore } from "@/store/useBoardroomStore";
 import { formatRelativeTime } from "@/lib/utils/format";
+import { QaBattle } from "@/components/profile/QaBattle";
 
 /** Deliberately separate from QaFeed — freeform commentary, not
  *  questions with answers. Keeps "ASK THE TEAM" clean for things a
@@ -22,13 +23,37 @@ export function CommentsSection({
   const commentLikes = useBoardroomStore((s) => s.commentLikes);
   const toggleCommentLike = useBoardroomStore((s) => s.toggleCommentLike);
   const postComment = useBoardroomStore((s) => s.postComment);
+  const crown = useBoardroomStore((s) => s.crowns[projectKey]);
   const [draft, setDraft] = useState("");
   const [justPosted, setJustPosted] = useState(false);
+  const [crownCopied, setCrownCopied] = useState(false);
 
   const all = useMemo(
     () => [...comments, ...(postedComments ?? [])].sort((a, b) => b.postedAt - a.postedAt),
     [comments, postedComments]
   );
+
+  const withLikes = all.map((c) => ({ ...c, likes: c.likes + (commentLikes[c.id] ? 1 : 0) }));
+  // The crowned comment gets its own pinned card instead of sitting
+  // wherever it lands in the feed — winning a battle is a bigger deal
+  // than its like count alone.
+  const feed = withLikes.filter((c) => c.id !== crown?.questionId);
+
+  const shareCrown = async () => {
+    if (!crown) return;
+    try {
+      const mine = crown.asker === "you";
+      const text = mine
+        ? `👑 My comment just got crowned best comment on ${projectName} in THE BOARDROOM: "${crown.question}"\n${window.location.origin}/profile/${projectKey}`
+        : `👑 The crowd just crowned the best comment on ${projectName} in THE BOARDROOM: "${crown.question}"\n${window.location.origin}/profile/${projectKey}`;
+      await navigator.clipboard.writeText(text);
+      setCrownCopied(true);
+      setTimeout(() => setCrownCopied(false), 1800);
+    } catch {
+      // Clipboard access can be denied by the browser — no fallback
+      // worth building for a "nice to have" share affordance.
+    }
+  };
 
   const post = () => {
     const text = draft.trim();
@@ -76,11 +101,41 @@ export function CommentsSection({
         )}
       </div>
 
+      <QaBattle
+        projectKey={projectKey}
+        candidates={withLikes.map((c) => ({ id: c.id, question: c.text, asker: c.author, upvotes: c.likes }))}
+      />
+
+      {crown && (
+        <div
+          className="mb-5 flex items-center gap-3 border border-board-lime bg-[#141A06] p-4"
+          style={{ animation: "board-stampin-flat 500ms cubic-bezier(0.3,1.4,0.5,1) both" }}
+        >
+          <span className="flex-none text-[20px] leading-none">👑</span>
+          <div className="min-w-0 flex-1">
+            <div className="font-mono text-[9px] font-extrabold tracking-[0.12em] text-board-lime">
+              CROWNED · BEST COMMENT
+            </div>
+            <div className="mt-1.5 font-mono text-[12px] font-bold leading-[1.5] text-board-heading">
+              &quot;{crown.question}&quot;
+            </div>
+            <div className="mt-1 font-mono text-[9px] text-board-tertiary">said by {crown.asker}</div>
+          </div>
+          <button
+            type="button"
+            onClick={shareCrown}
+            className="flex-none whitespace-nowrap border border-board-lime px-3 py-2 font-mono text-[9px] font-extrabold tracking-[0.08em] text-board-lime transition hover:bg-[#1B2308]"
+          >
+            {crownCopied ? "COPIED ✓" : "SHARE THIS WIN ↗"}
+          </button>
+        </div>
+      )}
+
       {all.length === 0 ? (
         <div className="font-mono text-[11px] text-board-tertiary">No comments yet. Be the first.</div>
       ) : (
         <div className="border-t border-[#1A1E16]">
-          {all.map((c) => {
+          {feed.map((c) => {
             const liked = !!commentLikes[c.id];
             return (
               <div key={c.id} className="flex gap-4 border-b border-[#1A1E16] py-3.5">
@@ -98,7 +153,7 @@ export function CommentsSection({
                     liked ? "text-board-lime" : "text-board-secondary hover:text-board-lime"
                   }`}
                 >
-                  {liked ? "♥" : "♡"} {c.likes + (liked ? 1 : 0)}
+                  {liked ? "♥" : "♡"} {c.likes}
                 </button>
               </div>
             );

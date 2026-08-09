@@ -12,11 +12,13 @@ export interface BattleCandidate {
   upvotes: number;
 }
 
-/** Two top-upvoted questions face off "king of the hill" style — the
- *  crowd's vote (seeded from existing upvotes, so it doesn't start at a
+/** Two top-liked comments face off "king of the hill" style — the
+ *  crowd's vote (seeded from existing likes, so it doesn't start at a
  *  suspicious 0-0) decides which one gets crowned. Resolves on a timer,
  *  then immediately queues the next pair from whatever's left in the
- *  pool. See store/useBoardroomStore.ts for the battle/crown state. */
+ *  pool. Backing the eventual winner earns bonus points — it has no
+ *  effect on the project's actual head-to-head vote. See
+ *  store/useBoardroomStore.ts for the battle/crown state. */
 export function QaBattle({ projectKey, candidates }: { projectKey: string; candidates: BattleCandidate[] }) {
   const battle = useBoardroomStore((s) => s.battles[projectKey]);
   const startBattle = useBoardroomStore((s) => s.startBattle);
@@ -72,16 +74,19 @@ export function QaBattle({ projectKey, candidates }: { projectKey: string; candi
   const pctA = total > 0 ? Math.round((battle.votesA / total) * 100) : 50;
 
   return (
-    <div className="mb-5.5 border-2 border-board-lime bg-[#0F1407] p-4.5">
+    <div className="mb-5 border border-[#3D4536] bg-[#0D1108] p-3.5">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex items-center gap-2 font-mono text-[10px] font-extrabold tracking-[0.14em] text-board-lime">
+        <div className="flex items-center gap-2 font-mono text-[9px] font-extrabold tracking-[0.12em] text-board-secondary-alt">
           <span className="block h-1.5 w-1.5 animate-[board-pulse_1.2s_ease-in-out_infinite] rounded-full bg-board-lime" />
-          KING OF THE HILL · CROWD PICKS THE BEST QUESTION
+          KING OF THE HILL · BEST COMMENT
         </div>
-        <div className="font-mono text-[10px] font-bold text-board-secondary-alt">{remainingSec}s left</div>
+        <div className="font-mono text-[9px] font-bold text-board-tertiary">{remainingSec}s left</div>
+      </div>
+      <div className="mt-1.5 font-mono text-[9px] leading-[1.6] text-board-disabled">
+        Back the one you think wins — +10 points if it does. Doesn&apos;t affect the actual project vote.
       </div>
 
-      <div className="mt-3.5 grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-[1fr_auto_1fr]">
+      <div className="mt-3 grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-[1fr_auto_1fr]">
         <BattleSide
           question={qA}
           votes={battle.votesA}
