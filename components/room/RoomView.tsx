@@ -145,202 +145,210 @@ export function RoomView({
         <div className="absolute inset-x-0 top-[max(-64px,-6vw)] aspect-[1920/1080] w-full">
           <img src="/marks/room.png" alt="" className="absolute inset-0 h-full w-full" />
           <AudienceRow />
-        </div>
 
-        <div
-          className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-1.5 overflow-hidden bg-black pb-9 sm:gap-3 sm:pb-0"
-          style={{ perspective: "800px" }}
-        >
-          {/* pb-9 (sm:pb-0) reserves room for the absolutely-positioned
-              progress overlay below — without it, centered content and
-              the overlay collide at short frame heights (narrow
-              viewports, where min-h-[320px] dominates 50vw). The line
-              subtitle drops out entirely below sm: there isn't room for
-              three lines of text plus the mark in that case. */}
-          {phase !== "door" && (
-            // Two nested elements, not one: the flip (rotateY) and the
-            // power-on (scaleY/brightness) both animate `transform`, and
-            // two animations driving the same property on one element
-            // don't compose — CSS just picks one. Each gets its own layer.
-            <div key={`flip-${current}`} style={{ animation: "board-card-flip 480ms ease-out both" }}>
-              <div
-                key={`live-${current}`}
-                className="flex flex-col items-center gap-1.5 text-center sm:gap-3"
-                style={{ animation: "board-poweron 1000ms cubic-bezier(0.2,0,0.2,1) both" }}
-              >
-                <img src={project.mark} alt="" className="h-8 w-8 sm:h-14 sm:w-14" />
-                <div className="max-w-full font-mono text-[clamp(15px,3.4vw,30px)] font-extrabold leading-[1.05] text-board-heading">
-                  {project.name}
-                </div>
-                <div className="hidden max-w-full font-mono text-[clamp(9px,1.3vw,12px)] text-[#7C8474] sm:block">
-                  {project.line}
+          {/* Nested inside this image-aspect wrapper (not the outer
+              frame) so its percentages resolve against the real
+              1920×1080 image, same reasoning as AudienceRow above.
+              Anchoring this to the outer wrapper instead — which is
+              height-capped/floored independently of the image's own
+              aspect ratio — is what let the progress bar float above
+              the screen art's true bottom edge at wide viewports,
+              where the image renders taller than the outer wrapper. */}
+          <div
+            className="absolute left-[23.75%] top-[13.33%] flex h-[42.96%] w-[52.5%] flex-col items-center justify-center gap-1.5 overflow-hidden bg-black pb-9 sm:gap-3 sm:pb-0"
+            style={{ perspective: "800px" }}
+          >
+            {/* pb-9 (sm:pb-0) reserves room for the absolutely-positioned
+                progress overlay below — without it, centered content and
+                the overlay collide at short frame heights (narrow
+                viewports, where min-h-[320px] dominates 50vw). The line
+                subtitle drops out entirely below sm: there isn't room for
+                three lines of text plus the mark in that case. */}
+            {phase !== "door" && (
+              // Two nested elements, not one: the flip (rotateY) and the
+              // power-on (scaleY/brightness) both animate `transform`, and
+              // two animations driving the same property on one element
+              // don't compose — CSS just picks one. Each gets its own layer.
+              <div key={`flip-${current}`} style={{ animation: "board-card-flip 480ms ease-out both" }}>
+                <div
+                  key={`live-${current}`}
+                  className="flex flex-col items-center gap-1.5 text-center sm:gap-3"
+                  style={{ animation: "board-poweron 1000ms cubic-bezier(0.2,0,0.2,1) both" }}
+                >
+                  <img src={project.mark} alt="" className="h-8 w-8 sm:h-14 sm:w-14" />
+                  <div className="max-w-full font-mono text-[clamp(15px,3.4vw,30px)] font-extrabold leading-[1.05] text-board-heading">
+                    {project.name}
+                  </div>
+                  <div className="hidden max-w-full font-mono text-[clamp(9px,1.3vw,12px)] text-[#7C8474] sm:block">
+                    {project.line}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="absolute inset-x-0 bottom-0 z-[3] bg-gradient-to-t from-black/90 to-transparent px-4 py-3.5">
-            <ProgressBar percent={pct} trackClassName="bg-[#1E2419]" />
-            <div className="mt-2 flex justify-between font-mono text-[10px] text-board-secondary">
-              <span>
-                {pct >= 100 ? "WATCHED IN FULL" : phase === "playing" ? "PLAYING" : "ENTERING"}
-              </span>
-              <span>
-                {formatClock(elapsedSeconds)} / {formatClock(project.pitchSeconds)}
-              </span>
+            <div className="absolute inset-x-0 bottom-0 z-[3] bg-gradient-to-t from-black/90 to-transparent px-4 py-3.5">
+              <ProgressBar percent={pct} trackClassName="bg-[#1E2419]" />
+              <div className="mt-2 flex justify-between font-mono text-[10px] text-board-secondary">
+                <span>
+                  {pct >= 100 ? "WATCHED IN FULL" : phase === "playing" ? "PLAYING" : "ENTERING"}
+                </span>
+                <span>
+                  {formatClock(elapsedSeconds)} / {formatClock(project.pitchSeconds)}
+                </span>
+              </div>
             </div>
+
+            {phase === "playing" && (
+              <PitchReactionLayer projectKey={project.key} elapsedSeconds={elapsedSeconds} />
+            )}
+
+            <AnimatePresence>
+              {phase === "done" && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#05070B]"
+                >
+                  <div className="font-mono text-[11px] font-bold tracking-[0.2em] text-board-success">
+                    PITCH COMPLETE · {project.name}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={advance}
+                    className="bg-board-lime px-8 py-4 font-mono text-[13px] font-extrabold tracking-[0.12em] text-board-bg transition hover:bg-board-lime-hover"
+                  >
+                    {advanceLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={replay}
+                    className="font-mono text-[11px] text-board-secondary transition hover:text-board-lime"
+                  >
+                    ↺ watch again
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          {phase === "playing" && (
-            <PitchReactionLayer projectKey={project.key} elapsedSeconds={elapsedSeconds} />
-          )}
-
           <AnimatePresence>
-            {phase === "done" && (
+            {phase === "door" && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
+                initial={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-[#05070B]"
+                transition={{ duration: 0.4 }}
+                className="absolute inset-0 overflow-hidden"
               >
-                <div className="font-mono text-[11px] font-bold tracking-[0.2em] text-board-success">
-                  PITCH COMPLETE · {project.name}
+                <div className="absolute inset-0 bg-[rgba(3,5,8,0.78)]" />
+
+                {/* Door: swings open in 3D perspective, revealing a
+                    gold-lit spill and a nameplate for the pitch behind it. */}
+                <div
+                  className="absolute overflow-hidden"
+                  style={{ left: "10.42%", top: "27.4%", width: "8.33%", height: "37.4%" }}
+                >
+                  <div className="absolute inset-0 overflow-hidden bg-[#04060A]">
+                    <div
+                      className="absolute inset-0 bg-gradient-to-r from-[rgba(204,255,0,0.20)] to-[rgba(204,255,0,0.02)]"
+                      style={{ animation: "board-spill 700ms 320ms both" }}
+                    />
+                  </div>
+                  <div className="absolute inset-0" style={{ perspective: "1100px" }}>
+                    <div
+                      className="absolute inset-0 origin-left border-[3px] border-[#4C5C31] bg-gradient-to-r from-[#2B3618] to-[#171E10] shadow-[22px_0_46px_rgba(0,0,0,0.7)]"
+                      style={{
+                        animation: "board-door-open 1100ms 220ms cubic-bezier(0.45,0,0.25,1) both",
+                      }}
+                    >
+                      <div className="absolute left-[14%] right-[14%] top-[5%] h-[26%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
+                      <div className="absolute left-[14%] right-[14%] top-[36%] h-[26%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
+                      <div className="absolute bottom-[5%] left-[14%] right-[14%] h-[24%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
+                      <div className="absolute right-[8%] top-[44%] h-3.5 w-3.5 rounded-full bg-[#D9C24A] shadow-[0_2px_0_#8A7A22]" />
+                      <div className="absolute right-[6%] top-[49%] h-1.5 w-5 bg-[#8A7A22]" />
+                      <div className="absolute left-[20%] right-[20%] top-[31%] bg-[#E8E4D4] px-[3px] py-[5px] text-center shadow-[0_2px_0_#9A9784]">
+                        <div className="font-mono text-[8px] font-extrabold leading-[1.3] text-[#15170F]">
+                          {project.name}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={advance}
-                  className="bg-board-lime px-8 py-4 font-mono text-[13px] font-extrabold tracking-[0.12em] text-board-bg transition hover:bg-board-lime-hover"
+
+                <div
+                  className="absolute animate-[board-flicker_2.6s_infinite] text-center font-mono text-[8px] font-bold tracking-[0.14em] text-board-lime"
+                  style={{ left: "9.6%", top: "24.2%", width: "9.6%" }}
                 >
-                  {advanceLabel}
-                </button>
-                <button
-                  type="button"
-                  onClick={replay}
-                  className="font-mono text-[11px] text-board-secondary transition hover:text-board-lime"
+                  IN SESSION
+                </div>
+
+                <div className="flex items-center gap-2.5 border border-[#2C3819] bg-[rgba(8,10,6,0.9)] px-3.5 py-2 absolute left-[2%] top-[8%]">
+                  <span className="block h-1.5 w-1.5 animate-[board-pulse_1.2s_infinite] bg-board-lime" />
+                  <span className="font-mono text-[9px] font-bold tracking-[0.18em] text-board-lime">
+                    NOW ENTERING · {project.name}
+                  </span>
+                </div>
+
+                {/* Walker: the pitch card walks out of the door and grows
+                    as it "becomes" the video screen — see MOTION.md
+                    "Walker sequence". All seven animations below share the
+                    same 1320ms delay; don't retime one independently. */}
+                <div
+                  className="absolute"
+                  style={{
+                    left: "12%",
+                    top: "41%",
+                    opacity: 0,
+                    animation:
+                      "board-walk-path 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both, board-walker-appear 1ms 1320ms both",
+                  }}
                 >
-                  ↺ watch again
-                </button>
+                  <div
+                    className="origin-bottom"
+                    style={{ animation: "board-walk-scale 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both" }}
+                  >
+                    <div
+                      className="absolute bottom-[-14px] left-1/2 h-4 w-24 -translate-x-1/2 rounded-full bg-black/55 blur-[3px]"
+                      style={{ animation: "board-shadow-walk 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both" }}
+                    />
+                    <div style={{ animation: "board-bob 300ms 1320ms ease-in-out 6 both" }}>
+                      <div className="w-[min(150px,11vw)] border-[3px] border-board-lime bg-[#E8E4D4] px-2.5 pb-2.5 pt-3 text-center shadow-[0_5px_0_#9A9784,0_0_34px_rgba(204,255,0,0.35)]">
+                        <img
+                          src={project.mark}
+                          alt=""
+                          className="mx-auto h-[min(52px,3.8vw)] w-[min(52px,3.8vw)]"
+                        />
+                        <div className="mt-1.5 font-mono text-[min(11px,0.8vw)] font-extrabold leading-[1.3] tracking-[0.04em] text-[#15170F]">
+                          {project.name}
+                        </div>
+                        <div className="mt-1 font-mono text-[min(7px,0.52vw)] leading-none tracking-[0.16em] text-[#6A6752]">
+                          CORE PITCH · {formatClock(project.pitchSeconds)}
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="mt-[-2px] flex justify-center gap-5.5"
+                      style={{ animation: "board-legs-off 2500ms 1320ms linear both" }}
+                    >
+                      <div
+                        className="relative h-[min(42px,3.1vw)] w-[min(12px,0.9vw)] origin-top bg-[#8CA02C]"
+                        style={{ animation: "board-leg-l 300ms 1320ms ease-in-out infinite" }}
+                      >
+                        <div className="absolute bottom-[-5px] left-[-4px] h-1.5 w-5 bg-[#12160D]" />
+                      </div>
+                      <div
+                        className="relative h-[min(42px,3.1vw)] w-[min(12px,0.9vw)] origin-top bg-[#8CA02C]"
+                        style={{ animation: "board-leg-r 300ms 1320ms ease-in-out infinite" }}
+                      >
+                        <div className="absolute bottom-[-5px] left-[-4px] h-1.5 w-5 bg-[#12160D]" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
-        <AnimatePresence>
-          {phase === "door" && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="absolute inset-0 overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-[rgba(3,5,8,0.78)]" />
-
-              {/* Door: swings open in 3D perspective, revealing a
-                  gold-lit spill and a nameplate for the pitch behind it. */}
-              <div
-                className="absolute overflow-hidden"
-                style={{ left: "10.42%", top: "27.4%", width: "8.33%", height: "37.4%" }}
-              >
-                <div className="absolute inset-0 overflow-hidden bg-[#04060A]">
-                  <div
-                    className="absolute inset-0 bg-gradient-to-r from-[rgba(204,255,0,0.20)] to-[rgba(204,255,0,0.02)]"
-                    style={{ animation: "board-spill 700ms 320ms both" }}
-                  />
-                </div>
-                <div className="absolute inset-0" style={{ perspective: "1100px" }}>
-                  <div
-                    className="absolute inset-0 origin-left border-[3px] border-[#4C5C31] bg-gradient-to-r from-[#2B3618] to-[#171E10] shadow-[22px_0_46px_rgba(0,0,0,0.7)]"
-                    style={{
-                      animation: "board-door-open 1100ms 220ms cubic-bezier(0.45,0,0.25,1) both",
-                    }}
-                  >
-                    <div className="absolute left-[14%] right-[14%] top-[5%] h-[26%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
-                    <div className="absolute left-[14%] right-[14%] top-[36%] h-[26%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
-                    <div className="absolute bottom-[5%] left-[14%] right-[14%] h-[24%] border-[3px] border-[#4C5C31] bg-[#1B2412]" />
-                    <div className="absolute right-[8%] top-[44%] h-3.5 w-3.5 rounded-full bg-[#D9C24A] shadow-[0_2px_0_#8A7A22]" />
-                    <div className="absolute right-[6%] top-[49%] h-1.5 w-5 bg-[#8A7A22]" />
-                    <div className="absolute left-[20%] right-[20%] top-[31%] bg-[#E8E4D4] px-[3px] py-[5px] text-center shadow-[0_2px_0_#9A9784]">
-                      <div className="font-mono text-[8px] font-extrabold leading-[1.3] text-[#15170F]">
-                        {project.name}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className="absolute animate-[board-flicker_2.6s_infinite] text-center font-mono text-[8px] font-bold tracking-[0.14em] text-board-lime"
-                style={{ left: "9.6%", top: "24.2%", width: "9.6%" }}
-              >
-                IN SESSION
-              </div>
-
-              <div className="flex items-center gap-2.5 border border-[#2C3819] bg-[rgba(8,10,6,0.9)] px-3.5 py-2 absolute left-[2%] top-[8%]">
-                <span className="block h-1.5 w-1.5 animate-[board-pulse_1.2s_infinite] bg-board-lime" />
-                <span className="font-mono text-[9px] font-bold tracking-[0.18em] text-board-lime">
-                  NOW ENTERING · {project.name}
-                </span>
-              </div>
-
-              {/* Walker: the pitch card walks out of the door and grows
-                  as it "becomes" the video screen — see MOTION.md
-                  "Walker sequence". All seven animations below share the
-                  same 1320ms delay; don't retime one independently. */}
-              <div
-                className="absolute"
-                style={{
-                  left: "12%",
-                  top: "41%",
-                  opacity: 0,
-                  animation:
-                    "board-walk-path 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both, board-walker-appear 1ms 1320ms both",
-                }}
-              >
-                <div
-                  className="origin-bottom"
-                  style={{ animation: "board-walk-scale 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both" }}
-                >
-                  <div
-                    className="absolute bottom-[-14px] left-1/2 h-4 w-24 -translate-x-1/2 rounded-full bg-black/55 blur-[3px]"
-                    style={{ animation: "board-shadow-walk 2500ms 1320ms cubic-bezier(0.35,0,0.65,1) both" }}
-                  />
-                  <div style={{ animation: "board-bob 300ms 1320ms ease-in-out 6 both" }}>
-                    <div className="w-[min(150px,11vw)] border-[3px] border-board-lime bg-[#E8E4D4] px-2.5 pb-2.5 pt-3 text-center shadow-[0_5px_0_#9A9784,0_0_34px_rgba(204,255,0,0.35)]">
-                      <img
-                        src={project.mark}
-                        alt=""
-                        className="mx-auto h-[min(52px,3.8vw)] w-[min(52px,3.8vw)]"
-                      />
-                      <div className="mt-1.5 font-mono text-[min(11px,0.8vw)] font-extrabold leading-[1.3] tracking-[0.04em] text-[#15170F]">
-                        {project.name}
-                      </div>
-                      <div className="mt-1 font-mono text-[min(7px,0.52vw)] leading-none tracking-[0.16em] text-[#6A6752]">
-                        CORE PITCH · {formatClock(project.pitchSeconds)}
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    className="mt-[-2px] flex justify-center gap-5.5"
-                    style={{ animation: "board-legs-off 2500ms 1320ms linear both" }}
-                  >
-                    <div
-                      className="relative h-[min(42px,3.1vw)] w-[min(12px,0.9vw)] origin-top bg-[#8CA02C]"
-                      style={{ animation: "board-leg-l 300ms 1320ms ease-in-out infinite" }}
-                    >
-                      <div className="absolute bottom-[-5px] left-[-4px] h-1.5 w-5 bg-[#12160D]" />
-                    </div>
-                    <div
-                      className="relative h-[min(42px,3.1vw)] w-[min(12px,0.9vw)] origin-top bg-[#8CA02C]"
-                      style={{ animation: "board-leg-r 300ms 1320ms ease-in-out infinite" }}
-                    >
-                      <div className="absolute bottom-[-5px] left-[-4px] h-1.5 w-5 bg-[#12160D]" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         <div
           className="absolute right-2 top-2 z-[6] w-[92px] border-2 px-2.5 py-2 text-center shadow-[0_6px_22px_rgba(0,0,0,0.7)] transition-colors duration-500 sm:right-6 sm:top-6 sm:w-[132px] sm:px-4 sm:py-3"

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { Project, QaItem } from "@/lib/types";
 
 export function CompareCard({
@@ -15,7 +16,11 @@ export function CompareCard({
 }) {
   const doxxed = project.people.filter((p) => p.handle);
   const answeredCount = qa.filter((q) => q.answer).length;
-  const topQuestions = [...qa].sort((a, b) => b.upvotes - a.upvotes).slice(0, 2);
+  const [qaExpanded, setQaExpanded] = useState(false);
+  const sortedQa = [...qa].sort((a, b) => b.upvotes - a.upvotes);
+  const previewCount = 2;
+  const visibleQuestions = qaExpanded ? sortedQa : sortedQa.slice(0, previewCount);
+  const hiddenCount = sortedQa.length - previewCount;
 
   return (
     <div
@@ -118,13 +123,30 @@ export function CompareCard({
               ASK THE TEAM · {answeredCount} of {qa.length} answered
             </div>
             <div className="mt-2 flex flex-col gap-1.5">
-              {topQuestions.map((q) => (
+              {visibleQuestions.map((q) => (
                 <div key={q.id} className="border-l-2 border-[#2C3327] pl-2.5 font-mono text-[11px] leading-[1.5] text-board-body">
                   &quot;{q.question}&quot;
                   {q.answer && <span className="ml-1.5 text-[9px] font-bold text-board-success">✓ ANSWERED</span>}
+                  {q.answer && (
+                    <div className="mt-1 border-l-2 border-board-lime bg-[#12160D] py-1.5 pl-2.5 text-[10px] leading-[1.5] text-board-secondary">
+                      {q.answer}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
+            {hiddenCount > 0 && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQaExpanded((v) => !v);
+                }}
+                className="mt-2 font-mono text-[10px] font-bold tracking-[0.06em] text-board-lime transition hover:translate-x-0.5"
+              >
+                {qaExpanded ? "SHOW LESS ▴" : `SHOW ALL ${qa.length} QUESTIONS ▾`}
+              </button>
+            )}
           </div>
         )}
 
