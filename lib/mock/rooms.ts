@@ -17,9 +17,17 @@ interface RoomSeed {
   closesInHours: number;
 }
 
+// A round is one shared voting window — every room in "Quarterfinal"
+// opens and closes together, not independently (see the design
+// handoff's "voting round duration ... start/end dates" — round-level,
+// not per-matchup). One room closing early while its round-mates
+// stayed open was a mock-data bug, not a real state: it showed up as
+// two different "round closes in" countdowns disagreeing with each
+// other, and a matchup marked CLOSED next to three marked OPEN in the
+// same round.
 const ROOM_SEEDS: RoomSeed[] = [
-  { id: "01", roundLabel: "Quarterfinal", n: 1, projectA: "A", projectB: "B", status: "open", closesInHours: 44 },
-  { id: "02", roundLabel: "Quarterfinal", n: 2, projectA: "C", projectB: "D", status: "closed", closesInHours: -68 },
+  { id: "01", roundLabel: "Quarterfinal", n: 1, projectA: "A", projectB: "B", status: "open", closesInHours: 68 },
+  { id: "02", roundLabel: "Quarterfinal", n: 2, projectA: "C", projectB: "D", status: "open", closesInHours: 68 },
   { id: "03", roundLabel: "Quarterfinal", n: 3, projectA: "E", projectB: "F", status: "open", closesInHours: 68 },
   { id: "04", roundLabel: "Quarterfinal", n: 4, projectA: "G", projectB: "H", status: "open", closesInHours: 68 },
 ];

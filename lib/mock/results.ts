@@ -9,19 +9,10 @@ export interface RoomResult {
 }
 
 /** Only closed rooms (see lib/mock/rooms.ts) have a result — commit-reveal
- *  ballots mean there's nothing to show until a round closes. */
-export const RESULTS: RoomResult[] = [
-  {
-    roomId: "02",
-    winnerKey: "D",
-    tallies: {
-      C: { pct: 41.7, votes: 1003 },
-      D: { pct: 58.3, votes: 1402 },
-    },
-    totalValid: 2405,
-    quarantinedCount: 88,
-  },
-];
+ *  ballots mean there's nothing to show until a round closes. Empty for
+ *  now: every room in the current (Quarterfinal) round is open, sharing
+ *  one schedule — nothing has closed yet to have a result. */
+export const RESULTS: RoomResult[] = [];
 
 export function getResult(roomId: string): RoomResult | undefined {
   return RESULTS.find((r) => r.roomId === roomId);
