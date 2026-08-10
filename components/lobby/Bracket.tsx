@@ -185,12 +185,12 @@ function QFEntry({
     <>
       <span className="w-3 font-mono text-[10px] font-bold text-board-disabled">{seed}</span>
       {eliminated ? (
-        <EliminatedIcon key={replayKey} mark={project.mark} size={22} inView={inView} />
+        <EliminatedIcon key={`icon-${replayKey}`} mark={project.mark} size={22} inView={inView} />
       ) : (
         <img src={project.mark} alt="" className="h-[22px] w-[22px] flex-none" />
       )}
       {eliminated ? (
-        <EliminatedLabel key={replayKey} project={project} inView={inView} />
+        <EliminatedLabel key={`label-${replayKey}`} project={project} inView={inView} />
       ) : (
         <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
       )}
@@ -237,12 +237,12 @@ function MobileQFEntry({ project, eliminated }: { project: Project; eliminated: 
   const content = (
     <>
       {eliminated ? (
-        <EliminatedIcon key={replayKey} mark={project.mark} size={22} inView={inView} />
+        <EliminatedIcon key={`icon-${replayKey}`} mark={project.mark} size={22} inView={inView} />
       ) : (
         <img src={project.mark} alt="" className="h-[22px] w-[22px]" />
       )}
       {eliminated ? (
-        <EliminatedLabel key={replayKey} project={project} inView={inView} />
+        <EliminatedLabel key={`label-${replayKey}`} project={project} inView={inView} />
       ) : (
         <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
       )}

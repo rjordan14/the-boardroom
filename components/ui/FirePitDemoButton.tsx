@@ -59,8 +59,8 @@ export function FirePitDemoButton() {
               </div>
 
               <div className="flex items-center justify-center gap-2.5 border border-[#2A241E] bg-[#0E0C09] px-4 py-3.5">
-                <EliminatedIcon key={replayKey} mark={DEMO_MARK} size={28} inView={true} />
-                <EliminatedLabel key={replayKey} project={{ name: "SAMPLE PROJECT" }} inView={true} />
+                <EliminatedIcon key={`icon-${replayKey}`} mark={DEMO_MARK} size={28} inView={true} />
+                <EliminatedLabel key={`label-${replayKey}`} project={{ name: "SAMPLE PROJECT" }} inView={true} />
               </div>
 
               <button
