@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, type Ref } from "react";
 import Link from "next/link";
 import type { Project, Room } from "@/lib/types";
 import { getResult } from "@/lib/mock/results";
@@ -168,62 +169,104 @@ function QFEntry({
   reverse?: boolean;
   eliminated?: boolean;
 }) {
-  const { ref, inView } = useInViewOnce<HTMLAnchorElement>();
-  return (
-    <Link
-      ref={ref}
-      href={`/profile/${project.key}`}
-      className={`flex items-center gap-2.5 border px-3 py-2.5 transition ${
-        eliminated ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]" : "border-board-border bg-board-card-alt hover:bg-[#151A11]"
-      } ${reverse ? "flex-row-reverse text-right" : ""}`}
-      style={
-        eliminated
-          ? reverse
-            ? { borderRight: "3px solid #5C3A2E" }
-            : { borderLeft: "3px solid #5C3A2E" }
-          : reverse
-            ? { borderRight: "3px solid #CCFF00" }
-            : { borderLeft: "3px solid #CCFF00" }
-      }
-    >
+  const { ref, inView } = useInViewOnce<HTMLElement>();
+  const [replayKey, setReplayKey] = useState(0);
+  const className = `flex items-center gap-2.5 border px-3 py-2.5 transition ${
+    eliminated ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]" : "border-board-border bg-board-card-alt hover:bg-[#151A11]"
+  } ${reverse ? "flex-row-reverse text-right" : ""}`;
+  const style = eliminated
+    ? reverse
+      ? { borderRight: "3px solid #5C3A2E" }
+      : { borderLeft: "3px solid #5C3A2E" }
+    : reverse
+      ? { borderRight: "3px solid #CCFF00" }
+      : { borderLeft: "3px solid #CCFF00" };
+  const content = (
+    <>
       <span className="w-3 font-mono text-[10px] font-bold text-board-disabled">{seed}</span>
       {eliminated ? (
-        <EliminatedIcon mark={project.mark} size={22} inView={inView} />
+        <EliminatedIcon key={replayKey} mark={project.mark} size={22} inView={inView} />
       ) : (
         <img src={project.mark} alt="" className="h-[22px] w-[22px] flex-none" />
       )}
       {eliminated ? (
-        <EliminatedLabel project={project} inView={inView} />
+        <EliminatedLabel key={replayKey} project={project} inView={inView} />
       ) : (
         <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
       )}
+    </>
+  );
+
+  // Once eliminated, the profile link gives way to a replay button —
+  // the animation plays once on scroll-into-view and is easy to miss
+  // (it's well under 2s), so there needs to be a reliable, repeatable
+  // way to see it again rather than only ever getting one shot per
+  // page load. The project's profile is still reachable elsewhere
+  // (Floor, My Activity, still-live opponents' matchup rows).
+  if (eliminated) {
+    return (
+      <button
+        ref={ref as Ref<HTMLButtonElement>}
+        type="button"
+        title="Watch it again"
+        onClick={() => setReplayKey((k) => k + 1)}
+        className={className}
+        style={style}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link ref={ref as Ref<HTMLAnchorElement>} href={`/profile/${project.key}`} className={className} style={style}>
+      {content}
     </Link>
   );
 }
 
 function MobileQFEntry({ project, eliminated }: { project: Project; eliminated: boolean }) {
-  const { ref, inView } = useInViewOnce<HTMLAnchorElement>();
-  return (
-    <Link
-      ref={ref}
-      href={`/profile/${project.key}`}
-      className={`flex items-center gap-2.5 border px-3 py-2 transition ${
-        eliminated
-          ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]"
-          : "border-board-border-alt bg-board-card hover:bg-[#151A11]"
-      }`}
-      style={{ borderLeft: eliminated ? "3px solid #5C3A2E" : "3px solid #CCFF00" }}
-    >
+  const { ref, inView } = useInViewOnce<HTMLElement>();
+  const [replayKey, setReplayKey] = useState(0);
+  const className = `flex items-center gap-2.5 border px-3 py-2 transition ${
+    eliminated
+      ? "border-[#2A241E] bg-[#0E0C09] hover:bg-[#161310]"
+      : "border-board-border-alt bg-board-card hover:bg-[#151A11]"
+  }`;
+  const style = { borderLeft: eliminated ? "3px solid #5C3A2E" : "3px solid #CCFF00" };
+  const content = (
+    <>
       {eliminated ? (
-        <EliminatedIcon mark={project.mark} size={22} inView={inView} />
+        <EliminatedIcon key={replayKey} mark={project.mark} size={22} inView={inView} />
       ) : (
         <img src={project.mark} alt="" className="h-[22px] w-[22px]" />
       )}
       {eliminated ? (
-        <EliminatedLabel project={project} inView={inView} />
+        <EliminatedLabel key={replayKey} project={project} inView={inView} />
       ) : (
         <span className="font-mono text-[11px] font-bold text-board-body">{project.name}</span>
       )}
+    </>
+  );
+
+  if (eliminated) {
+    return (
+      <button
+        ref={ref as Ref<HTMLButtonElement>}
+        type="button"
+        title="Watch it again"
+        onClick={() => setReplayKey((k) => k + 1)}
+        className={className}
+        style={style}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <Link ref={ref as Ref<HTMLAnchorElement>} href={`/profile/${project.key}`} className={className} style={style}>
+      {content}
     </Link>
   );
 }
