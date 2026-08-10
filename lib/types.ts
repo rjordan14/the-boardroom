@@ -34,6 +34,9 @@ export interface QaItem {
   answeredBy: string | null;
   /** Auto-flagged for moderation review (e.g. "LIKELY SPAM"), null otherwise. */
   flag?: string | null;
+  /** When the question was asked — lets the feed show "how stale is this?"
+   *  instead of pure upvote-count with no sense of time. */
+  postedAt: number;
 }
 
 /** Freeform commentary, separate from the Q&A ask/answer flow — no

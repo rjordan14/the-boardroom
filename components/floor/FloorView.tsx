@@ -68,7 +68,10 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
         answers, just the floor talking. Head to a project&apos;s profile for the formal Q&amp;A.
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-1.5">
+      <div className="mt-6 font-mono text-[9px] font-bold tracking-[0.14em] text-board-tertiary">
+        FILTER BY PROJECT
+      </div>
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <FilterChip active={filter === "ALL"} onClick={() => setFilter("ALL")}>
           ALL <span className="text-board-tertiary">· {allComments.length}</span>
         </FilterChip>
@@ -93,7 +96,10 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
       </div>
 
       <div className="mt-4 border border-board-border-alt bg-board-card-alt p-4.5">
-        <div className="flex flex-wrap gap-2">
+        <div className="font-mono text-[9px] font-bold tracking-[0.14em] text-board-tertiary">
+          SAY SOMETHING — POSTING TO
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
           {projects.map((p) => (
             <button
               key={p.key}
@@ -191,8 +197,10 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
                 }}
                 aria-label={liked ? "Unlike this comment" : "Like this comment"}
                 title={liked ? "Unlike this comment" : "Like this comment"}
-                className={`flex flex-none items-center gap-1 self-start font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
-                  liked ? "text-board-lime" : "text-board-secondary hover:text-board-lime"
+                className={`flex flex-none items-center gap-1 self-start border px-2 py-1 font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
+                  liked
+                    ? "border-board-lime bg-[#141A06] text-board-lime"
+                    : "border-board-border-alt text-board-secondary hover:border-[#4A5A2C] hover:text-board-lime"
                 }`}
               >
                 {liked ? "♥" : "♡"} {c.likes + (liked ? 1 : 0)}

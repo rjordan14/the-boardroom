@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { QaItem } from "@/lib/types";
 import { getSubmittedQuestions, useBoardroomStore } from "@/store/useBoardroomStore";
 import { SparkBurst } from "@/components/ui/SparkBurst";
+import { formatRelativeTime } from "@/lib/utils/format";
 
 interface FeedItem {
   id: string;
@@ -12,7 +13,10 @@ interface FeedItem {
   question: string;
   answer: string | null;
   answeredBy: string | null;
+  postedAt: number;
 }
+
+type QaFilter = "all" | "unanswered" | "answered";
 
 export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; projectName: string; qa: QaItem[] }) {
   const qaUpvotes = useBoardroomStore((s) => s.qaUpvotes);
@@ -22,29 +26,42 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
   const [draft, setDraft] = useState("");
   const [justPosted, setJustPosted] = useState(false);
   const [sparkingId, setSparkingId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<QaFilter>("all");
 
-  const allItems: FeedItem[] = [
-    ...qa.map((q) => ({
-      id: q.id,
-      asker: q.asker,
-      upvotes: q.upvotes,
-      question: q.question,
-      answer: q.answer,
-      answeredBy: q.answeredBy,
-    })),
-    ...submitted.map((q) => ({
-      id: q.id,
-      asker: "you",
-      upvotes: 0,
-      question: q.question,
-      answer: null,
-      answeredBy: null,
-    })),
-  ]
-    .map((item) => ({ ...item, upvotes: item.upvotes + (qaUpvotes[item.id] ? 1 : 0) }))
-    .sort((a, b) => b.upvotes - a.upvotes);
+  const allItems: FeedItem[] = useMemo(
+    () =>
+      [
+        ...qa.map((q) => ({
+          id: q.id,
+          asker: q.asker,
+          upvotes: q.upvotes,
+          question: q.question,
+          answer: q.answer,
+          answeredBy: q.answeredBy,
+          postedAt: q.postedAt,
+        })),
+        ...submitted.map((q) => ({
+          id: q.id,
+          asker: "you",
+          upvotes: 0,
+          question: q.question,
+          answer: null,
+          answeredBy: null,
+          postedAt: q.askedAt,
+        })),
+      ]
+        .map((item) => ({ ...item, upvotes: item.upvotes + (qaUpvotes[item.id] ? 1 : 0) }))
+        .sort((a, b) => b.upvotes - a.upvotes),
+    [qa, submitted, qaUpvotes]
+  );
 
   const answeredCount = allItems.filter((q) => q.answer).length;
+  const unansweredCount = allItems.length - answeredCount;
+  const visibleItems = allItems.filter((item) => {
+    if (filter === "answered") return !!item.answer;
+    if (filter === "unanswered") return !item.answer;
+    return true;
+  });
 
   const post = () => {
     const text = draft.trim();
@@ -65,6 +82,20 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
           {answeredCount} of {allItems.length} answered
         </div>
       </div>
+
+      {allItems.length > 0 && (
+        <div className="mb-4 flex gap-1.5">
+          <QaFilterTab active={filter === "all"} onClick={() => setFilter("all")}>
+            ALL <span className="opacity-60">· {allItems.length}</span>
+          </QaFilterTab>
+          <QaFilterTab active={filter === "unanswered"} onClick={() => setFilter("unanswered")}>
+            AWAITING ANSWER <span className="opacity-60">· {unansweredCount}</span>
+          </QaFilterTab>
+          <QaFilterTab active={filter === "answered"} onClick={() => setFilter("answered")}>
+            ANSWERED <span className="opacity-60">· {answeredCount}</span>
+          </QaFilterTab>
+        </div>
+      )}
 
       <div className="mb-5.5 border border-board-border-alt bg-board-card-alt p-4.5">
         <textarea
@@ -100,8 +131,13 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
             No questions yet. Be the first — the answer goes on the permanent record.
           </div>
         )}
-        {allItems.map((item) => (
-          <div key={item.id} className="flex gap-4 border border-board-border-alt bg-board-card-alt p-4.5">
+        {allItems.length > 0 && visibleItems.length === 0 && (
+          <div className="border border-board-border-alt bg-board-card-alt p-4.5 font-mono text-[11px] text-board-tertiary">
+            Nothing in this view yet.
+          </div>
+        )}
+        {visibleItems.map((item) => (
+          <div key={item.id} className="flex gap-3.5 border border-board-border-alt bg-board-card-alt p-4.5">
             <button
               type="button"
               onClick={() => {
@@ -111,22 +147,31 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
                 }
                 toggleQaUpvote(item.id);
               }}
-              className={`relative flex w-11 flex-none flex-col items-center gap-1 pt-0.5 transition hover:-translate-y-0.5 hover:text-board-lime ${
-                qaUpvotes[item.id] ? "text-board-lime" : "text-[#C4CCBB]"
+              aria-label={qaUpvotes[item.id] ? "Remove upvote" : "Upvote this question"}
+              title={qaUpvotes[item.id] ? "Remove upvote" : "Upvote this question"}
+              className={`relative flex w-11 flex-none flex-col items-center gap-0.5 border py-2 transition hover:-translate-y-0.5 ${
+                qaUpvotes[item.id]
+                  ? "border-board-lime bg-[#141A06] text-board-lime"
+                  : "border-board-border-alt text-[#C4CCBB] hover:border-[#4A5A2C] hover:text-board-lime"
               }`}
             >
               {sparkingId === item.id && <SparkBurst />}
-              <span className="font-mono text-[13px] font-extrabold">▲</span>
-              <span className="font-mono text-[12px] font-bold">{item.upvotes}</span>
+              <span className="font-mono text-[13px] font-extrabold leading-none">▲</span>
+              <span className="font-mono text-[12px] font-bold leading-none">{item.upvotes}</span>
             </button>
-            <div className="flex-1">
-              <div className="flex items-center gap-2.5">
-                <span className="font-mono text-[10px] text-board-tertiary">{item.asker}</span>
-                {item.answer && (
-                  <span className="font-mono text-[9px] font-bold tracking-[0.1em] text-board-success">
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                {item.answer ? (
+                  <span className="inline-flex items-center gap-1 bg-[#12200C] px-2 py-0.5 font-mono text-[9px] font-extrabold tracking-[0.1em] text-board-success">
                     ✓ ANSWERED
                   </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 border border-[#3D3826] bg-[#1A1608] px-2 py-0.5 font-mono text-[9px] font-extrabold tracking-[0.1em] text-board-amber">
+                    ● AWAITING ANSWER
+                  </span>
                 )}
+                <span className="font-mono text-[10px] text-board-tertiary">{item.asker}</span>
+                <span className="font-mono text-[9px] text-board-disabled">{formatRelativeTime(item.postedAt)}</span>
               </div>
               <div className="mt-2 font-mono text-[13px] font-bold leading-[1.5] text-board-heading">
                 {item.question}
@@ -146,5 +191,29 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
         ))}
       </div>
     </div>
+  );
+}
+
+function QaFilterTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`border px-3 py-1.5 font-mono text-[9px] font-bold tracking-[0.08em] transition ${
+        active
+          ? "border-board-lime bg-[#141A06] text-board-lime"
+          : "border-board-border-alt text-board-secondary hover:border-[#4A5A2C] hover:text-board-heading"
+      }`}
+    >
+      {children}
+    </button>
   );
 }

@@ -1,5 +1,7 @@
 import type { QaItem } from "@/lib/types";
 
+const HOUR = 3_600_000;
+
 /** Ported from the prototype's QA constant, flattened to one list keyed by projectKey. */
 export const QA_ITEMS: QaItem[] = [
   {
@@ -12,6 +14,7 @@ export const QA_ITEMS: QaItem[] = [
     answer:
       "Receipts are bound to the transaction hash, not the wallet — so history stays intact even if you move wallets. A linked-wallet view is on the testnet roadmap.",
     answeredBy: "LEDGERBOY TEAM",
+    postedAt: Date.now() - 30 * HOUR,
   },
   {
     id: "A-2",
@@ -23,6 +26,7 @@ export const QA_ITEMS: QaItem[] = [
     answer:
       "Fee-share starts accruing at mainnet launch. Testnet activity counts toward an allowlist multiplier, not a token amount.",
     answeredBy: "LEDGERBOY TEAM",
+    postedAt: Date.now() - 21 * HOUR,
   },
   {
     id: "A-3",
@@ -32,6 +36,7 @@ export const QA_ITEMS: QaItem[] = [
     question: "Any plan to support Solana receipts or is this EVM-only?",
     answer: null,
     answeredBy: null,
+    postedAt: Date.now() - 3 * HOUR,
   },
   {
     id: "B-1",
@@ -43,6 +48,7 @@ export const QA_ITEMS: QaItem[] = [
     answer:
       "Yes — nag frequency is per-vault and capped at once a day by default. Fully mutable.",
     answeredBy: "VAULTMOUSE TEAM",
+    postedAt: Date.now() - 40 * HOUR,
   },
   {
     id: "B-2",
@@ -53,6 +59,7 @@ export const QA_ITEMS: QaItem[] = [
       "What happens to a vault if the staking-gate contract gets upgraded?",
     answer: null,
     answeredBy: null,
+    postedAt: Date.now() - 6 * HOUR,
   },
   {
     id: "F-1",
@@ -62,6 +69,7 @@ export const QA_ITEMS: QaItem[] = [
     question: "Is liquidation audio generated live or pre-recorded?",
     answer: "Live, pulled from onchain events.",
     answeredBy: "MARGIN CALL FM TEAM",
+    postedAt: Date.now() - 18 * HOUR,
   },
   {
     id: "H-1",
@@ -72,6 +80,7 @@ export const QA_ITEMS: QaItem[] = [
     answer: null,
     answeredBy: null,
     flag: "LIKELY SPAM",
+    postedAt: Date.now() - 1 * HOUR,
   },
 ];
 

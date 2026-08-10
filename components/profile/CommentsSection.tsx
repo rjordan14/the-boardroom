@@ -149,8 +149,12 @@ export function CommentsSection({
                 <button
                   type="button"
                   onClick={() => toggleCommentLike(c.id)}
-                  className={`flex flex-none items-start gap-1 font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
-                    liked ? "text-board-lime" : "text-board-secondary hover:text-board-lime"
+                  aria-label={liked ? "Unlike this comment" : "Like this comment"}
+                  title={liked ? "Unlike this comment" : "Like this comment"}
+                  className={`flex flex-none items-center gap-1 self-start border px-2 py-1 font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
+                    liked
+                      ? "border-board-lime bg-[#141A06] text-board-lime"
+                      : "border-board-border-alt text-board-secondary hover:border-[#4A5A2C] hover:text-board-lime"
                   }`}
                 >
                   {liked ? "♥" : "♡"} {c.likes}

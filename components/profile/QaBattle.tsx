@@ -83,7 +83,8 @@ export function QaBattle({ projectKey, candidates }: { projectKey: string; candi
         <div className="font-mono text-[9px] font-bold text-board-tertiary">{remainingSec}s left</div>
       </div>
       <div className="mt-1.5 font-mono text-[9px] leading-[1.6] text-board-disabled">
-        Back the one you think wins — +10 points if it does. Doesn&apos;t affect the actual project vote.
+        Tap the comment you think wins to back it — +10 points if it does. Doesn&apos;t affect the actual
+        project vote.
       </div>
 
       <div className="mt-3 grid grid-cols-1 items-stretch gap-2.5 sm:grid-cols-[1fr_auto_1fr]">
@@ -135,13 +136,20 @@ function BattleSide({
       onClick={onPick}
       disabled={disabled}
       className={`flex flex-col gap-1.5 border p-3 transition disabled:cursor-default ${reverse ? "text-left sm:text-right" : "text-left"} ${
-        picked ? "border-board-lime bg-[#141A06]" : "border-[#2C3327] bg-[#0A0D07] hover:enabled:border-[#4A5A2C]"
+        picked
+          ? "border-board-lime bg-[#141A06]"
+          : "border-[#2C3327] bg-[#0A0D07] hover:enabled:border-board-lime hover:enabled:bg-[#0F1409]"
       }`}
     >
       <div className="font-mono text-[9px] text-board-tertiary">{question.asker}</div>
       <div className="font-mono text-[11px] leading-[1.5] text-board-body">&quot;{question.question}&quot;</div>
       <div className="mt-1 font-mono text-[10px] font-bold text-board-lime">
-        {votes} votes{picked ? " · YOUR PICK" : ""}
+        {votes} votes
+        {picked ? (
+          " · YOUR PICK ✓"
+        ) : (
+          <span className="text-board-secondary-alt"> · TAP TO BACK</span>
+        )}
       </div>
     </button>
   );
