@@ -105,7 +105,13 @@ export function EliminatedLabel({ project, inView }: { project: Project; inView:
         <span style={{ textDecoration: settled ? "line-through" : undefined }}>{project.name}</span>
       </div>
       <div className="mt-1 font-mono text-[9px] tracking-[0.12em] text-board-tertiary">
-        {settled ? "ELIMINATED" : " "}
+        {settled ? (
+          <>
+            ELIMINATED <span className="text-board-lime">· ▶ WATCH AGAIN</span>
+          </>
+        ) : (
+          " "
+        )}
       </div>
     </div>
   );
