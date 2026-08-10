@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/lib/chain/Providers";
+import { FirePitDemoButton } from "@/components/ui/FirePitDemoButton";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             all the way down. A fixed-position badge here instead read as
             floating text drifting over whatever content was underneath
             it while scrolling, which is illegible and distracting. */}
-        <div className="border-t border-[#161914] px-[clamp(14px,4vw,48px)] py-5 text-center font-mono text-[9px] leading-[1.8] text-[#5C6653]">
+        <div className="flex flex-col items-center gap-2 border-t border-[#161914] px-[clamp(14px,4vw,48px)] py-5 text-center font-mono text-[9px] leading-[1.8] text-[#5C6653]">
           <div>a Ronald Jorlin website</div>
           <div>
             webmaster and{" "}
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               chief hoffster
             </a>
           </div>
+          <FirePitDemoButton />
         </div>
       </body>
     </html>

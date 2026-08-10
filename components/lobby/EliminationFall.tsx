@@ -88,7 +88,16 @@ export function EliminatedIcon({ mark, size, inView }: { mark: string; size: num
   );
 }
 
-export function EliminatedLabel({ project, inView }: { project: Project; inView: boolean }) {
+export function EliminatedLabel({
+  project,
+  inView,
+}: {
+  // Only the name is actually read below — Pick, not the full Project,
+  // so a lightweight caller (see FirePitDemoButton.tsx) doesn't need to
+  // fabricate a complete Project just to reuse this label.
+  project: Pick<Project, "name">;
+  inView: boolean;
+}) {
   const [settled, setSettled] = useState(false);
   useEffect(() => {
     if (!inView) return;
