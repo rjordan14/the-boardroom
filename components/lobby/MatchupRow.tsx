@@ -54,12 +54,12 @@ export function MatchupRow({
   const chosenProject = voted ? (projectA.key === ballotChoice ? projectA : projectB) : null;
   const accent = state === "closed" || state === "awaiting_round" ? "#4ADE80" : voted ? "#4ADE80" : "#CCFF00";
 
+  // Voted rooms get no separate status badge — the VotedPanel receipt
+  // below (chosen project, IN/OUT times, "YOU VOTED · BALLOT SEALED")
+  // already says it, and every row that's voted repeating the same
+  // "VOTED" label up top added nothing but noise down a list of them.
   const statusBadge =
-    state === "voted" ? (
-      <span className="font-mono text-[9px] font-bold tracking-[0.1em] text-board-success">
-        ✓ VOTED
-      </span>
-    ) : state === "closed" || state === "awaiting_round" ? (
+    state === "voted" ? null : state === "closed" || state === "awaiting_round" ? (
       <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-board-tertiary">
         CLOSED
       </span>
