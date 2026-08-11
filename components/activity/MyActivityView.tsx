@@ -16,7 +16,19 @@ export function MyActivityView({
   const backing = useBoardroomStore((s) => s.backing);
   const points = useBoardroomStore((s) => s.points);
   const crowns = useBoardroomStore((s) => s.crowns);
+  const resetActivity = useBoardroomStore((s) => s.resetActivity);
   const [recapCopied, setRecapCopied] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
+
+  const handleResetClick = () => {
+    if (!confirmingReset) {
+      setConfirmingReset(true);
+      setTimeout(() => setConfirmingReset(false), 4000);
+      return;
+    }
+    resetActivity();
+    setConfirmingReset(false);
+  };
 
   const roomsVoted = Object.keys(ballotChoice).length;
   const crownsWon = Object.values(crowns).filter((c) => c.asker === "you").length;
@@ -130,6 +142,29 @@ export function MyActivityView({
         ))}
       </div>
       )}
+
+      <div className="mt-10 border border-dashed border-[#3D2A2A] bg-[#140C0C] p-4.5">
+        <div className="font-mono text-[9px] font-extrabold tracking-[0.14em] text-board-error">
+          RESET MY DEMO DATA
+        </div>
+        <div className="mt-1.5 max-w-[520px] font-mono text-[11px] leading-[1.7] text-board-secondary">
+          Wipes every ballot, watch progress, comment, question, and point earned on this wallet —
+          every room goes back to never-watched, like you just clocked in for the first time.
+          Useful right before showing someone a live demo, so a room you already watched or voted
+          in doesn&apos;t skip straight to Compare.
+        </div>
+        <button
+          type="button"
+          onClick={handleResetClick}
+          className={`mt-3.5 flex-none whitespace-nowrap border-2 px-4 py-2.5 font-mono text-[10px] font-extrabold tracking-[0.08em] transition ${
+            confirmingReset
+              ? "border-board-error bg-[#2A0F0C] text-board-error"
+              : "border-[#3D2A2A] text-board-secondary hover:border-board-error hover:text-board-error"
+          }`}
+        >
+          {confirmingReset ? "TAP AGAIN TO CONFIRM RESET" : "RESET MY DEMO DATA"}
+        </button>
+      </div>
     </div>
   );
 }

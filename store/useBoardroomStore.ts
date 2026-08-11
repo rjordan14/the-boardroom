@@ -123,6 +123,15 @@ interface BoardroomState {
    *  replaces it (dethroning, not accumulating a full history). */
   crowns: Record<string, Crown>;
   resolveBattle: (projectKey: string, battleKey: string, winner: Crown, winningSide: "A" | "B") => void;
+
+  /** Wipes every field above back to its just-clocked-in-for-the-first-
+   *  time state — watch progress, ballots, comments, questions, points,
+   *  all of it. This is the only "real" reset available: there's no
+   *  backend to reset instead, so a wallet's local storage IS its whole
+   *  history (see the module comment on the persist() call below). Exists
+   *  for demo prep, where leftover progress from earlier testing makes a
+   *  room skip straight to "already watched" instead of starting fresh. */
+  resetActivity: () => void;
 }
 
 export interface PointsLogEntry {
@@ -331,6 +340,27 @@ export const useBoardroomStore = create<BoardroomState>()(
       get().awardPoints(10, "Backed the winning question");
     }
   },
+
+  resetActivity: () =>
+    set({
+      watchProgress: {},
+      watchStartedAt: {},
+      modalProjectKey: null,
+      ballotChoice: {},
+      ballotSealedAt: {},
+      backing: {},
+      qaUpvotes: {},
+      submittedQuestions: {},
+      pitchReactions: {},
+      postedComments: {},
+      commentLikes: {},
+      followedProjects: {},
+      points: 0,
+      pointsLog: [],
+      battles: {},
+      battleVotes: {},
+      crowns: {},
+    }),
     }),
     {
       name: "boardroom-store",
