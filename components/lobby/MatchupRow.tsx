@@ -177,14 +177,26 @@ function ProjectLink({ project, reverse }: { project: Project; reverse?: boolean
   );
 }
 
+// Same checkbox-with-checkmark used for a picked project on the
+// Compare screen (components/compare/CompareCard.tsx) — reused here so
+// "this is the vote action" reads consistently everywhere it appears.
+// Its border is dark rather than lime like the Compare screen's: there
+// it sits on a dark card, but here the button underneath it is already
+// lime, so a same-color box would have no visible edge without one.
+function VoteCheckIcon() {
+  return (
+    <span className="flex h-[22px] w-[22px] flex-none items-center justify-center border-2 border-board-bg bg-board-lime transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
+      <span className="font-mono text-[13px] font-extrabold leading-none text-board-bg">✓</span>
+    </span>
+  );
+}
+
 function VoteCta({ roomId }: { roomId: string }) {
   return (
     <Link href={`/room/${roomId}`} className="block w-full max-w-[252px] transition hover:-translate-y-0.5">
       <div className="group flex items-center justify-between gap-2.5 bg-board-lime px-3.5 py-3.5 text-board-bg shadow-[0_3px_0_#82A200]">
         <span className="font-mono text-[13px] font-extrabold tracking-[0.03em]">CLOCK IN TO VOTE</span>
-        <span className="inline-block text-[17px] leading-none transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
-          🕐
-        </span>
+        <VoteCheckIcon />
       </div>
     </Link>
   );
@@ -198,9 +210,7 @@ function CompareCta({ roomId }: { roomId: string }) {
     >
       <div className="group flex items-center justify-between gap-2.5 bg-board-lime px-3.5 py-3.5 text-board-bg shadow-[0_3px_0_#82A200]">
         <span className="font-mono text-[13px] font-extrabold tracking-[0.03em]">COMPARE & VOTE</span>
-        <span className="inline-block text-[17px] leading-none transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
-          🕐
-        </span>
+        <VoteCheckIcon />
       </div>
     </Link>
   );

@@ -38,6 +38,13 @@ export default async function LobbyPage() {
     .slice(0, 4)
     .map((question) => ({ question, project: projects[question.projectKey] }))
     .filter((h): h is { question: (typeof allQa)[number]; project: Project } => Boolean(h.project));
+  // "Quarterfinal" (singular, per-room) -> "QUARTERFINALS" (the round as
+  // a whole) — every room shares this round's label, so any one of them
+  // tells us what round is live.
+  const roundLabel = rooms[0]?.roundLabel;
+  const roundHeading = roundLabel
+    ? `${roundLabel.toUpperCase()}${roundLabel.toUpperCase().endsWith("S") ? "" : "S"}`
+    : "TODAY'S MATCHUPS";
   const firstOpen = rooms.find((r) => r.status === "open") ?? rooms[0];
   const openRooms = rooms.filter((r) => r.status === "open");
   const roundComplete = openRooms.length === 0;
@@ -78,7 +85,7 @@ export default async function LobbyPage() {
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
-                TODAY&apos;S MATCHUPS
+                {roundHeading}
               </div>
               <div className="font-mono text-[12px] text-[#7C8474]">
                 Clock in, watch, vote. No gatekeepers.
