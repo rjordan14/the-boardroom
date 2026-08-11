@@ -5,6 +5,7 @@ import { listProjects } from "@/lib/api/projects";
 import { listAllComments } from "@/lib/api/comments";
 import { listAllQa } from "@/lib/api/qa";
 import { listResults } from "@/lib/api/results";
+import { getChampion, getCurrentRoundLabel } from "@/lib/api/tournament";
 import { Header, WalletChip } from "@/components/ui/Header";
 import { Hero } from "@/components/lobby/Hero";
 import { ExplainerSteps } from "@/components/lobby/ExplainerSteps";
@@ -25,11 +26,12 @@ import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 export const dynamic = "force-dynamic";
 
 export default async function LobbyPage() {
-  const [rooms, projectList, floorComments, allQa] = await Promise.all([
+  const [rooms, projectList, floorComments, allQa, currentRoundLabel] = await Promise.all([
     listRooms(),
     listProjects(),
     listAllComments(),
     listAllQa(),
+    getCurrentRoundLabel(),
   ]);
   const results = await listResults(rooms.map((r) => r.id));
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
@@ -38,15 +40,27 @@ export default async function LobbyPage() {
     .slice(0, 4)
     .map((question) => ({ question, project: projects[question.projectKey] }))
     .filter((h): h is { question: (typeof allQa)[number]; project: Project } => Boolean(h.project));
+
+  // Once Semifinal/Final rooms exist alongside already-decided
+  // Quarterfinal ones, "TODAY'S MATCHUPS" needs to show only whichever
+  // round is actually live — not a pile of every room from every round
+  // stacked together. `currentRoundLabel` is null once Final has
+  // closed, meaning there's no live round left at all.
+  const currentRoundRooms = currentRoundLabel
+    ? rooms.filter((r) => r.roundLabel === currentRoundLabel)
+    : [];
+  const tournamentComplete = currentRoundLabel === null;
+  const championKey = tournamentComplete ? await getChampion() : null;
+  const champion = championKey ? projects[championKey] : null;
+
   // "Quarterfinal" (singular, per-room) -> "QUARTERFINALS" (the round as
-  // a whole) — every room shares this round's label, so any one of them
-  // tells us what round is live.
-  const roundLabel = rooms[0]?.roundLabel;
-  const roundHeading = roundLabel
-    ? `${roundLabel.toUpperCase()}${roundLabel.toUpperCase().endsWith("S") ? "" : "S"}`
+  // a whole) — every room in the live round shares its label, so any
+  // one of them tells us what round is live.
+  const roundHeading = currentRoundLabel
+    ? `${currentRoundLabel.toUpperCase()}${currentRoundLabel.toUpperCase().endsWith("S") ? "" : "S"}`
     : "TODAY'S MATCHUPS";
-  const firstOpen = rooms.find((r) => r.status === "open") ?? rooms[0];
-  const openRooms = rooms.filter((r) => r.status === "open");
+  const firstOpen = currentRoundRooms.find((r) => r.status === "open") ?? currentRoundRooms[0];
+  const openRooms = currentRoundRooms.filter((r) => r.status === "open");
   const roundComplete = openRooms.length === 0;
   const roundClosesAt = openRooms.length
     ? openRooms.reduce((latest, r) => (r.closesAt > latest ? r.closesAt : latest), openRooms[0].closesAt)
@@ -70,56 +84,80 @@ export default async function LobbyPage() {
               </div>
               <ExplainerSteps />
             </div>
-            <CountdownPanel
-              closesAt={firstOpen.closesAt}
-              firstOpenRoomId={firstOpen.id}
-              roundComplete={roundComplete}
-            />
+            {tournamentComplete && champion ? (
+              <div className="border-2 border-board-lime bg-gradient-to-b from-[#141B08] to-[#0F1407] p-[clamp(20px,2vw,28px)] text-center">
+                <div className="mx-auto mb-1.5 w-fit animate-[board-floaty_2.6s_ease-in-out_infinite] text-[28px] leading-none">
+                  🏆
+                </div>
+                <div className="font-mono text-[10px] font-bold tracking-[0.22em] text-board-secondary-alt">
+                  SEASON 01 COMPLETE
+                </div>
+                <div className="mt-2 font-mono text-[clamp(22px,2.4vw,28px)] font-extrabold leading-[1.15] text-board-lime">
+                  {champion.name} LAUNCHES
+                </div>
+                <Link
+                  href={`/profile/${champion.key}`}
+                  className="mt-4 block bg-board-lime px-4 py-3.5 text-center font-mono text-[12px] font-extrabold tracking-[0.1em] text-board-bg transition hover:bg-board-lime-hover"
+                >
+                  VIEW {champion.name} →
+                </Link>
+              </div>
+            ) : (
+              firstOpen && (
+                <CountdownPanel
+                  closesAt={firstOpen.closesAt}
+                  firstOpenRoomId={firstOpen.id}
+                  roundComplete={roundComplete}
+                />
+              )
+            )}
           </div>
           <VotingBackingExplainer />
         </div>
 
         <ActivityTicker hotQuestions={hotQuestions} />
 
-        <div id="matchups" className="scroll-mt-6 px-[clamp(14px,4vw,48px)] pt-12">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
-                {roundHeading}
+        {!tournamentComplete && (
+          <div id="matchups" className="scroll-mt-6 px-[clamp(14px,4vw,48px)] pt-12">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
+                  {roundHeading}
+                </div>
+                <div className="font-mono text-[12px] text-[#7C8474]">
+                  Clock in, watch, vote. No gatekeepers.
+                </div>
               </div>
-              <div className="font-mono text-[12px] text-[#7C8474]">
-                Clock in, watch, vote. No gatekeepers.
-              </div>
+              {!roundComplete && roundClosesAt && (
+                <div className="border-2 border-board-lime bg-[#111607] px-4 py-2.5">
+                  <div className="flex items-center gap-2 font-mono text-[9px] font-bold tracking-[0.2em] text-board-secondary-alt">
+                    <span className="block h-2 w-2 animate-[board-pulse_1.5s_ease-in-out_infinite] rounded-full bg-board-lime" />
+                    ROUND VOTING ENDS IN
+                  </div>
+                  <div className="mt-1 font-mono text-[18px] font-extrabold leading-tight text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.4)]">
+                    <CountdownTimer target={roundClosesAt} />
+                  </div>
+                </div>
+              )}
             </div>
-            {!roundComplete && roundClosesAt && (
-              <div className="border-2 border-board-lime bg-[#111607] px-4 py-2.5">
-                <div className="flex items-center gap-2 font-mono text-[9px] font-bold tracking-[0.2em] text-board-secondary-alt">
-                  <span className="block h-2 w-2 animate-[board-pulse_1.5s_ease-in-out_infinite] rounded-full bg-board-lime" />
-                  ROUND VOTING ENDS IN
-                </div>
-                <div className="mt-1 font-mono text-[18px] font-extrabold leading-tight text-board-lime [text-shadow:0_0_16px_rgba(204,255,0,0.4)]">
-                  <CountdownTimer target={roundClosesAt} />
-                </div>
-              </div>
-            )}
-          </div>
 
-          <div className="mt-4">
-            <YourRoundStrip rooms={rooms} />
-          </div>
+            <div className="mt-4">
+              <YourRoundStrip rooms={currentRoundRooms} />
+            </div>
 
-          <div className="mt-4 border border-board-border bg-board-card-alt">
-            {rooms.map((room) => (
-              <MatchupRow
-                key={room.id}
-                room={room}
-                projectA={projects[room.projectA]}
-                projectB={projects[room.projectB]}
-                roundComplete={roundComplete}
-              />
-            ))}
+            <div className="mt-4 border border-board-border bg-board-card-alt">
+              {currentRoundRooms.map((room) => (
+                <MatchupRow
+                  key={room.id}
+                  room={room}
+                  projectA={projects[room.projectA]}
+                  projectB={projects[room.projectB]}
+                  roundComplete={roundComplete}
+                />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="px-[clamp(14px,4vw,48px)] pt-12">
           <EliminatedStrip />

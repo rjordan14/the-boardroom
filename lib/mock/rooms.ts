@@ -1,5 +1,5 @@
 import type { Room, ProjectKey, RoomStatus } from "@/lib/types";
-import { isRoomClosed } from "@/lib/tournament/store";
+import { getGeneratedRooms, isRoomClosed, type GeneratedRoom } from "@/lib/tournament/store";
 
 interface RoomSeed {
   id: string;
@@ -48,11 +48,30 @@ function toRoom(seed: RoomSeed): Room {
   };
 }
 
+// Semifinal and Final rooms don't exist as seed data — they're born the
+// moment the round before them closes and pairs up its winners (see
+// lib/tournament/store.ts). Same "always open" as a fresh quarterfinal:
+// generation only happens once the prior round is already decided.
+function generatedRoomToRoom(g: GeneratedRoom): Room {
+  const status: RoomStatus = isRoomClosed(g.id) ? "closed" : "open";
+  return {
+    id: g.id,
+    roundLabel: g.roundLabel,
+    n: g.n,
+    projectA: g.projectA,
+    projectB: g.projectB,
+    status,
+    closesAt: new Date(Date.now() + g.closesInHours * 3_600_000).toISOString(),
+  };
+}
+
 export function getRoom(id: string): Room | undefined {
   const seed = ROOM_SEEDS.find((r) => r.id === id);
-  return seed ? toRoom(seed) : undefined;
+  if (seed) return toRoom(seed);
+  const generated = getGeneratedRooms().find((r) => r.id === id);
+  return generated ? generatedRoomToRoom(generated) : undefined;
 }
 
 export function listRooms(): Room[] {
-  return ROOM_SEEDS.map(toRoom);
+  return [...ROOM_SEEDS.map(toRoom), ...getGeneratedRooms().map(generatedRoomToRoom)];
 }

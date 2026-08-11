@@ -19,7 +19,14 @@ export default async function ProjectProfilePage({
     getCommentsForProject(project.key),
     listRooms(),
   ]);
-  const room = rooms.find((r) => r.projectA === project.key || r.projectB === project.key);
+  // A project that keeps winning appears in more than one room over the
+  // season (Quarterfinal, then Semifinal, then Final) — prefer whichever
+  // one is still open, falling back to the most recent (listRooms()
+  // returns them in round order, so the last match is the furthest
+  // they've gotten), rather than always the very first (earliest,
+  // possibly long-closed) room they were ever in.
+  const projectRooms = rooms.filter((r) => r.projectA === project.key || r.projectB === project.key);
+  const room = projectRooms.find((r) => r.status === "open") ?? projectRooms[projectRooms.length - 1];
 
   return (
     <div data-screen="profile">

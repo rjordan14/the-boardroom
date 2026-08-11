@@ -23,8 +23,14 @@ export default async function ResultPage({
   // in progress elsewhere). This route has no such gate on its own, so
   // without this check, direct navigation here would leak the result
   // through a side door the Lobby was deliberately keeping shut.
+  // Scoped to this room's own round — with Semifinal/Final rooms now
+  // generated once Quarterfinal closes, "every room" across every round
+  // would never be true while a later round is still live, permanently
+  // hiding an already-decided earlier round's results.
   const rooms = await listRooms();
-  const roundComplete = rooms.every((r) => r.status !== "open");
+  const roundComplete = rooms
+    .filter((r) => r.roundLabel === room.roundLabel)
+    .every((r) => r.status !== "open");
   if (!roundComplete) {
     return (
       <div data-screen="result-sealed">
