@@ -1,9 +1,15 @@
 import { listRooms } from "@/lib/api/rooms";
 import { listProjects } from "@/lib/api/projects";
+import { listResults } from "@/lib/api/results";
 import { BracketTab } from "@/components/admin/BracketTab";
+
+// Reads live round-close state (lib/tournament/store.ts) that an admin
+// action can change at any time — must not be frozen at build time.
+export const dynamic = "force-dynamic";
 
 export default async function AdminBracketPage() {
   const [rooms, projectList] = await Promise.all([listRooms(), listProjects()]);
+  const results = await listResults(rooms.map((r) => r.id));
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
-  return <BracketTab rooms={rooms} projects={projects} />;
+  return <BracketTab rooms={rooms} projects={projects} results={results} />;
 }

@@ -1,0 +1,39 @@
+import { NextResponse } from "next/server";
+import { listRooms } from "@/lib/api/rooms";
+import { closeRound, fabricateResult } from "@/lib/tournament/store";
+import type { ProjectKey } from "@/lib/types";
+
+/** Admin declares a winner per room; there's no real backend
+ *  aggregating ballots across wallets to tally instead (see
+ *  lib/tournament/store.ts). Always closes a whole round at once —
+ *  every room in a round shares one voting window (lib/mock/rooms.ts),
+ *  so there's no such thing as closing just one. */
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => null);
+  const winners = body?.winners;
+  if (!winners || typeof winners !== "object") {
+    return NextResponse.json({ error: "winners is required" }, { status: 400 });
+  }
+
+  const rooms = await listRooms();
+  if (rooms.length === 0) {
+    return NextResponse.json({ error: "no rooms found" }, { status: 400 });
+  }
+  const roundLabel = rooms[0].roundLabel;
+
+  const results = [];
+  for (const room of rooms) {
+    const winnerKey = winners[room.id] as ProjectKey | undefined;
+    if (winnerKey !== room.projectA && winnerKey !== room.projectB) {
+      return NextResponse.json(
+        { error: `missing or invalid winner for room ${room.id}` },
+        { status: 400 }
+      );
+    }
+    const loserKey = winnerKey === room.projectA ? room.projectB : room.projectA;
+    results.push(fabricateResult(room.id, winnerKey, loserKey));
+  }
+
+  closeRound(roundLabel, results);
+  return NextResponse.json({ ok: true, roundLabel, results });
+}

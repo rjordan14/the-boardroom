@@ -77,6 +77,7 @@ interface BoardroomState {
    *  screen this session. No backend to post to, so this IS the record. */
   submittedQuestions: Record<string, SubmittedQuestion[]>;
   submitQuestion: (projectKey: string, question: string) => void;
+  retractQuestion: (projectKey: string, id: string) => void;
 
   /** Keyed by project.key (a pitch belongs to the project, not a room —
    *  reused if the same project ever appears in a replayed room). Every
@@ -220,6 +221,13 @@ export const useBoardroomStore = create<BoardroomState>()(
     }));
     get().awardPoints(5, "Asked a question");
   },
+  retractQuestion: (projectKey, id) =>
+    set((state) => ({
+      submittedQuestions: {
+        ...state.submittedQuestions,
+        [projectKey]: (state.submittedQuestions[projectKey] ?? EMPTY_QUESTIONS).filter((q) => q.id !== id),
+      },
+    })),
 
   pitchReactions: {},
   addPitchReaction: (projectKey, emoji, atSeconds) => {

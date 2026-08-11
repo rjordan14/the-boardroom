@@ -197,13 +197,13 @@ export function FloorView({ comments, projects }: { comments: Comment[]; project
                 }}
                 aria-label={liked ? "Unlike this comment" : "Like this comment"}
                 title={liked ? "Unlike this comment" : "Like this comment"}
-                className={`flex flex-none items-center gap-1 self-start border px-2 py-1 font-mono text-[10px] font-bold transition hover:-translate-y-0.5 ${
+                className={`flex flex-none items-center gap-1.5 self-start border px-3.5 py-2.5 font-mono text-[15px] font-bold transition hover:-translate-y-0.5 ${
                   liked
                     ? "border-board-lime bg-[#141A06] text-board-lime"
                     : "border-board-border-alt text-board-secondary hover:border-[#4A5A2C] hover:text-board-lime"
                 }`}
               >
-                {liked ? "♥" : "♡"} {c.likes + (liked ? 1 : 0)}
+                <span className="text-[19px] leading-none">{liked ? "♥" : "♡"}</span> {c.likes + (liked ? 1 : 0)}
               </button>
             </div>
           );

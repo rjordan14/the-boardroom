@@ -6,6 +6,15 @@
  * question this doesn't attempt to answer. Not the Zustand client
  * store (store/usePortalStore.ts) — that runs in the browser and can't
  * hold data written by the webhook route, which runs server-side.
+ *
+ * The Maps below live on globalThis, not as plain module-level
+ * `const`s: Next.js dev (Turbopack) compiles page Server Components
+ * and API Route Handlers as separate module graphs, so a plain
+ * module-level Map gets a distinct copy per graph — the webhook route
+ * (app/api/mux/webhook) and the page that reads it (app/admin/submissions)
+ * would each see their own, never-synced copy. globalThis is the one
+ * thing actually shared across those graphs within a running process
+ * (confirmed via lib/tournament/store.ts hitting this exact bug).
  */
 
 /** 2:30 — see docs/decisions.md "Pitch video: length cap". */
@@ -29,13 +38,23 @@ interface UploadContext {
   questionId?: string;
 }
 
-const uploads = new Map<string, UploadStatus>();
-const contexts = new Map<string, UploadContext>();
-// Separate from UploadStatus itself so decideReadyStatus (below) can
-// stay a pure function of its inputs — its own tests assert an exact
-// return shape, and a timestamp inside it would make that assertion
-// depend on wall-clock time.
-const readyAt = new Map<string, number>();
+interface VideoStoreState {
+  uploads: Map<string, UploadStatus>;
+  contexts: Map<string, UploadContext>;
+  // Separate from UploadStatus itself so decideReadyStatus (below) can
+  // stay a pure function of its inputs — its own tests assert an exact
+  // return shape, and a timestamp inside it would make that assertion
+  // depend on wall-clock time.
+  readyAt: Map<string, number>;
+}
+
+const globalForVideo = globalThis as unknown as { __boardroomVideoStore?: VideoStoreState };
+const state: VideoStoreState = (globalForVideo.__boardroomVideoStore ??= {
+  uploads: new Map(),
+  contexts: new Map(),
+  readyAt: new Map(),
+});
+const { uploads, contexts, readyAt } = state;
 
 export function initUpload(uploadId: string, context: UploadContext = { kind: "pitch" }): void {
   uploads.set(uploadId, { state: "waiting" });

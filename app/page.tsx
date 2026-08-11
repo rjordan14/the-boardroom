@@ -4,6 +4,7 @@ import { listRooms } from "@/lib/api/rooms";
 import { listProjects } from "@/lib/api/projects";
 import { listAllComments } from "@/lib/api/comments";
 import { listAllQa } from "@/lib/api/qa";
+import { listResults } from "@/lib/api/results";
 import { Header, WalletChip } from "@/components/ui/Header";
 import { Hero } from "@/components/lobby/Hero";
 import { ExplainerSteps } from "@/components/lobby/ExplainerSteps";
@@ -18,6 +19,11 @@ import { FloorPreview } from "@/components/lobby/FloorPreview";
 import { CountdownTimer } from "@/components/ui/CountdownTimer";
 import { RoundCloseEffect } from "@/components/ui/RoundCloseEffect";
 
+// Reads live room/result state (lib/tournament/store.ts) that an admin
+// close-round action can change at any time — must not be frozen at
+// build time, same reasoning as app/admin/submissions/page.tsx.
+export const dynamic = "force-dynamic";
+
 export default async function LobbyPage() {
   const [rooms, projectList, floorComments, allQa] = await Promise.all([
     listRooms(),
@@ -25,6 +31,7 @@ export default async function LobbyPage() {
     listAllComments(),
     listAllQa(),
   ]);
+  const results = await listResults(rooms.map((r) => r.id));
   const projects = Object.fromEntries(projectList.map((p) => [p.key, p]));
   const hotQuestions = [...allQa]
     .sort((a, b) => b.upvotes - a.upvotes)
@@ -56,14 +63,18 @@ export default async function LobbyPage() {
               </div>
               <ExplainerSteps />
             </div>
-            <CountdownPanel closesAt={firstOpen.closesAt} firstOpenRoomId={firstOpen.id} />
+            <CountdownPanel
+              closesAt={firstOpen.closesAt}
+              firstOpenRoomId={firstOpen.id}
+              roundComplete={roundComplete}
+            />
           </div>
           <VotingBackingExplainer />
         </div>
 
         <ActivityTicker hotQuestions={hotQuestions} />
 
-        <div className="px-[clamp(14px,4vw,48px)] pt-12">
+        <div id="matchups" className="scroll-mt-6 px-[clamp(14px,4vw,48px)] pt-12">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="mb-1 font-mono text-[clamp(19px,2.8vw,26px)] font-extrabold leading-[1.05] tracking-[0.02em] text-board-heading">
@@ -105,7 +116,7 @@ export default async function LobbyPage() {
 
         <div className="px-[clamp(14px,4vw,48px)] pt-12">
           <EliminatedStrip />
-          <Bracket rooms={rooms} projects={projects} />
+          <Bracket rooms={rooms} projects={projects} results={results} />
         </div>
 
         <div className="px-[clamp(14px,4vw,48px)] pt-8">

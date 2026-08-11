@@ -1,4 +1,5 @@
 import type { ProjectKey } from "@/lib/types";
+import { getPublishedResult } from "@/lib/tournament/store";
 
 export interface RoomResult {
   roomId: string;
@@ -9,11 +10,11 @@ export interface RoomResult {
 }
 
 /** Only closed rooms (see lib/mock/rooms.ts) have a result — commit-reveal
- *  ballots mean there's nothing to show until a round closes. Empty for
- *  now: every room in the current (Quarterfinal) round is open, sharing
- *  one schedule — nothing has closed yet to have a result. */
+ *  ballots mean there's nothing to show until a round closes. Static and
+ *  empty: results only exist once an admin closes the round (see
+ *  lib/tournament/store.ts), which publishes into that store, not here. */
 export const RESULTS: RoomResult[] = [];
 
 export function getResult(roomId: string): RoomResult | undefined {
-  return RESULTS.find((r) => r.roomId === roomId);
+  return getPublishedResult(roomId) ?? RESULTS.find((r) => r.roomId === roomId);
 }

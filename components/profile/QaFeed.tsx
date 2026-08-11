@@ -14,6 +14,10 @@ interface FeedItem {
   answer: string | null;
   answeredBy: string | null;
   postedAt: number;
+  // Only true for a question you posted yourself this session — those
+  // are the only ones you can retract (nothing else is "yours" to
+  // delete, and there's no moderation surface for the mock seed data).
+  isLocal: boolean;
 }
 
 type QaFilter = "all" | "unanswered" | "answered";
@@ -23,6 +27,7 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
   const toggleQaUpvote = useBoardroomStore((s) => s.toggleQaUpvote);
   const submitted = useBoardroomStore((s) => getSubmittedQuestions(s.submittedQuestions, projectKey));
   const submitQuestion = useBoardroomStore((s) => s.submitQuestion);
+  const retractQuestion = useBoardroomStore((s) => s.retractQuestion);
   const [draft, setDraft] = useState("");
   const [justPosted, setJustPosted] = useState(false);
   const [sparkingId, setSparkingId] = useState<string | null>(null);
@@ -39,6 +44,7 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
           answer: q.answer,
           answeredBy: q.answeredBy,
           postedAt: q.postedAt,
+          isLocal: false,
         })),
         ...submitted.map((q) => ({
           id: q.id,
@@ -48,6 +54,7 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
           answer: null,
           answeredBy: null,
           postedAt: q.askedAt,
+          isLocal: true,
         })),
       ]
         .map((item) => ({ ...item, upvotes: item.upvotes + (qaUpvotes[item.id] ? 1 : 0) }))
@@ -172,6 +179,17 @@ export function QaFeed({ projectKey, projectName, qa }: { projectKey: string; pr
                 )}
                 <span className="font-mono text-[10px] text-board-tertiary">{item.asker}</span>
                 <span className="font-mono text-[9px] text-board-disabled">{formatRelativeTime(item.postedAt)}</span>
+                {item.isLocal && (
+                  <button
+                    type="button"
+                    onClick={() => retractQuestion(projectKey, item.id)}
+                    aria-label="Delete this question"
+                    title="Delete this question"
+                    className="ml-auto flex-none font-mono text-[9px] font-bold text-board-tertiary transition hover:text-board-error"
+                  >
+                    ✕ DELETE
+                  </button>
+                )}
               </div>
               <div className="mt-2 font-mono text-[13px] font-bold leading-[1.5] text-board-heading">
                 {item.question}

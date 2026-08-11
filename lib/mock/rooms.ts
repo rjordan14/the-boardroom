@@ -1,4 +1,5 @@
 import type { Room, ProjectKey, RoomStatus } from "@/lib/types";
+import { isRoomClosed } from "@/lib/tournament/store";
 
 interface RoomSeed {
   id: string;
@@ -33,13 +34,16 @@ const ROOM_SEEDS: RoomSeed[] = [
 ];
 
 function toRoom(seed: RoomSeed): Room {
+  // An admin-triggered close (see lib/tournament/store.ts) overrides the
+  // seed's own countdown — that's the whole point of a manual close.
+  const status: RoomStatus = isRoomClosed(seed.id) ? "closed" : seed.status;
   return {
     id: seed.id,
     roundLabel: seed.roundLabel,
     n: seed.n,
     projectA: seed.projectA,
     projectB: seed.projectB,
-    status: seed.status,
+    status,
     closesAt: new Date(Date.now() + seed.closesInHours * 3_600_000).toISOString(),
   };
 }

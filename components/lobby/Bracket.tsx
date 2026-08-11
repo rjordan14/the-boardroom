@@ -3,7 +3,7 @@
 import { useState, type Ref } from "react";
 import Link from "next/link";
 import type { Project, Room } from "@/lib/types";
-import { getResult } from "@/lib/mock/results";
+import type { RoomResult } from "@/lib/mock/results";
 import { EliminatedIcon, EliminatedLabel, useInViewOnce } from "./EliminationFall";
 
 /**
@@ -23,9 +23,16 @@ const RIGHT_SEEDS: [number, number][] = [
 export function Bracket({
   rooms,
   projects,
+  results,
 }: {
   rooms: Room[];
   projects: Record<string, Project>;
+  // Passed down from the server (app/page.tsx via lib/api/results.ts)
+  // rather than read here — this is a client component, and importing
+  // lib/mock/results.ts's getResult() directly would bundle a
+  // build-time-frozen copy into the browser, never seeing an admin's
+  // later round-close (see lib/tournament/store.ts).
+  results: Record<string, RoomResult>;
 }) {
   const left = rooms.slice(0, 2);
   const right = rooms.slice(2, 4);
@@ -52,7 +59,7 @@ export function Bracket({
         >
           <div className="flex flex-col justify-around gap-5">
             {left.map((room, i) => (
-              <QFColumn key={room.id} room={room} projects={projects} seeds={LEFT_SEEDS[i]} />
+              <QFColumn key={room.id} room={room} projects={projects} results={results} seeds={LEFT_SEEDS[i]} />
             ))}
           </div>
 
@@ -61,7 +68,7 @@ export function Bracket({
               <SFPlaceholder
                 key={room.id}
                 roomId={room.id}
-                winner={winnerFor(room, projects)}
+                winner={winnerFor(room, projects, results)}
               />
             ))}
           </div>
@@ -73,7 +80,7 @@ export function Bracket({
               <SFPlaceholder
                 key={room.id}
                 roomId={room.id}
-                winner={winnerFor(room, projects)}
+                winner={winnerFor(room, projects, results)}
                 reverse
               />
             ))}
@@ -81,7 +88,7 @@ export function Bracket({
 
           <div className="flex flex-col justify-around gap-5">
             {right.map((room, i) => (
-              <QFColumn key={room.id} room={room} projects={projects} seeds={RIGHT_SEEDS[i]} reverse />
+              <QFColumn key={room.id} room={room} projects={projects} results={results} seeds={RIGHT_SEEDS[i]} reverse />
             ))}
           </div>
         </div>
@@ -94,7 +101,7 @@ export function Bracket({
         {rooms.map((room) => {
           const a = projects[room.projectA];
           const b = projects[room.projectB];
-          const result = getResult(room.id);
+          const result = results[room.id];
           const loserKey = result ? (result.winnerKey === a.key ? b.key : a.key) : null;
           return (
             <div key={room.id} className="border border-board-border-alt bg-board-card-alt">
@@ -131,17 +138,19 @@ export function Bracket({
 function QFColumn({
   room,
   projects,
+  results,
   seeds,
   reverse,
 }: {
   room: Room;
   projects: Record<string, Project>;
+  results: Record<string, RoomResult>;
   seeds: [number, number];
   reverse?: boolean;
 }) {
   const a = projects[room.projectA];
   const b = projects[room.projectB];
-  const result = getResult(room.id);
+  const result = results[room.id];
   const loserKey = result ? (result.winnerKey === a.key ? b.key : a.key) : null;
   return (
     <div className={`flex items-center ${reverse ? "flex-row-reverse" : ""}`}>
@@ -271,8 +280,12 @@ function MobileQFEntry({ project, eliminated }: { project: Project; eliminated: 
   );
 }
 
-function winnerFor(room: Room, projects: Record<string, Project>): Project | undefined {
-  const result = getResult(room.id);
+function winnerFor(
+  room: Room,
+  projects: Record<string, Project>,
+  results: Record<string, RoomResult>
+): Project | undefined {
+  const result = results[room.id];
   return result ? projects[result.winnerKey] : undefined;
 }
 

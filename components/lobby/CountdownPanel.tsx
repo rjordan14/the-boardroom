@@ -4,10 +4,39 @@ import { CountdownTimer } from "@/components/ui/CountdownTimer";
 export function CountdownPanel({
   closesAt,
   firstOpenRoomId,
+  roundComplete,
 }: {
   closesAt: string;
   firstOpenRoomId: string;
+  // Every room shares one voting window (see lib/mock/rooms.ts), so
+  // once the round closes there's no "next open room" left to send
+  // someone to — a live countdown + "CLOCK IN TO VOTE" CTA pointing at
+  // an already-decided room is actively misleading, not just stale.
+  roundComplete: boolean;
 }) {
+  if (roundComplete) {
+    return (
+      <div className="border-2 border-dashed border-board-border-alt bg-gradient-to-b from-[#141B08] to-[#0F1407] p-[clamp(20px,2vw,28px)]">
+        <div className="flex items-center gap-2 font-mono text-[10px] font-bold tracking-[0.22em] text-board-success">
+          <span className="block h-[7px] w-[7px] rounded-full bg-board-success" />
+          QUARTERFINAL CLOSED
+        </div>
+        <div className="mt-3.5 font-mono text-[clamp(22px,2.4vw,32px)] font-extrabold leading-[1.15] text-board-heading">
+          Ballots are sealed. Results are in.
+        </div>
+        <div className="mt-3 font-mono text-[10px] text-board-secondary-alt">
+          Every room in this round has a published result below.
+        </div>
+        <a
+          href="#matchups"
+          className="mt-5 block border border-board-border-alt px-4 py-5 text-center font-mono text-[clamp(12px,1.15vw,15px)] font-extrabold leading-[1.2] tracking-[0.1em] text-board-body transition hover:border-board-lime hover:text-board-lime"
+        >
+          SEE RESULTS ↓
+        </a>
+      </div>
+    );
+  }
+
   return (
     <div className="animate-[board-dash-drift_3.4s_ease-in-out_infinite] border-2 border-dashed border-board-lime bg-gradient-to-b from-[#141B08] to-[#0F1407] p-[clamp(20px,2vw,28px)] shadow-[0_0_0_1px_rgba(204,255,0,0.10),0_14px_44px_rgba(204,255,0,0.13)]">
       <div className="flex items-center gap-2 font-mono text-[10px] font-bold tracking-[0.22em] text-[#9AB63C]">

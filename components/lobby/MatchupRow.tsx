@@ -182,8 +182,8 @@ function VoteCta({ roomId }: { roomId: string }) {
     <Link href={`/room/${roomId}`} className="block w-full max-w-[252px] transition hover:-translate-y-0.5">
       <div className="group flex items-center justify-between gap-2.5 bg-board-lime px-3.5 py-3.5 text-board-bg shadow-[0_3px_0_#82A200]">
         <span className="font-mono text-[13px] font-extrabold tracking-[0.03em]">CLOCK IN TO VOTE</span>
-        <span className="inline-block font-mono text-[14px] font-extrabold transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
-          ↸
+        <span className="inline-block text-[17px] leading-none transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
+          🕐
         </span>
       </div>
     </Link>
@@ -198,8 +198,8 @@ function CompareCta({ roomId }: { roomId: string }) {
     >
       <div className="group flex items-center justify-between gap-2.5 bg-board-lime px-3.5 py-3.5 text-board-bg shadow-[0_3px_0_#82A200]">
         <span className="font-mono text-[13px] font-extrabold tracking-[0.03em]">COMPARE & VOTE</span>
-        <span className="inline-block font-mono text-[14px] font-extrabold transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
-          ↸
+        <span className="inline-block text-[17px] leading-none transition-transform group-hover:animate-[board-nudge_0.6s_ease-in-out_infinite]">
+          🕐
         </span>
       </div>
     </Link>
