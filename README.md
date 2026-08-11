@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Boardroom
 
-## Getting Started
+**The community decides who launches.**
 
-First, run the development server:
+The Boardroom is a crypto pitch-competition platform. Vetted projects submit
+short pitches and compete head-to-head in a single-elimination bracket
+(Quarterfinal → Semifinal → Final). The community watches both pitches in a
+matchup, casts one sealed ballot per wallet per room, and the winner earns a
+real token launch. Voting is free and equal — no gatekeepers, no leaderboard
+to game, no ticker to front-run. Separately, wallets can optionally escrow
+$STONKBROKER behind the project they voted for; it never buys extra votes,
+but converts into an allocation of the winner's token if it launches, or is
+fully reclaimable if it doesn't.
+
+Live: **[the-boardroom-app.vercel.app](https://the-boardroom-app.vercel.app)**
+/ **[clocktfin.xyz](https://clocktfin.xyz)**
+
+## Status
+
+This is a demo/v1 build — the full voting UX, bracket progression (a round
+closing automatically pairs its winners into the next round, all the way to
+a champion), Q&A, comments, and an admin console for running the season are
+real and working. What's still simulated rather than backed by a real chain
+or backend:
+
+- **Voting and wallets** run against a mock chain adapter
+  (`lib/chain/mockAdapter.ts`) — no real contracts or transactions yet. See
+  `docs/decisions.md` for the target design (voter-pays-gas, an
+  encrypted-commit/reveal ballot scheme) once real integration starts.
+- **Pitch playback** is simulated on a fixed timer rather than real video,
+  though pitch uploads do go through a real [Mux](https://mux.com) pipeline
+  into Admin's Submissions queue when `MUX_TOKEN_ID`/`MUX_TOKEN_SECRET` are
+  configured (see `.env.local.example`).
+- **Round/result state** lives in an in-memory server store
+  (`lib/tournament/store.ts`) — real and shared across everyone hitting the
+  deployed instance, but resets on server restart. No database yet.
+
+## Tech stack
+
+Next.js (App Router) · TypeScript · Tailwind CSS v4 · Zustand (with
+`persist` for per-wallet client state) · Vitest + Testing Library
+
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Admin console is at
+`/admin` (mock operator-wallet gate, no real auth yet).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To enable real video uploads, copy `.env.local.example` to `.env.local` and
+fill in Mux credentials — without them, uploads fall back to the existing
+mock "queued for review" flow.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project structure
 
-## Learn More
+- `lib/mock/` — seed data (projects, rooms, Q&A, comments, results).
+- `lib/api/` — the swap point between mock and real data; pages import from
+  here, not from `lib/mock/` directly, so a real backend can replace the
+  mock layer without touching UI code.
+- `lib/tournament/` — server-side round-progression state (closing a round,
+  generating the next one, undoing a close).
+- `lib/chain/` — the mock wallet/voting adapter and its typed interface.
+- `store/useBoardroomStore.ts` — per-wallet client state (watch progress,
+  ballots, comments, points), persisted to `localStorage`.
+- `app/admin/` — the operator console (bracket, submissions, Q&A
+  moderation, waitlist).
 
-To learn more about Next.js, take a look at the following resources:
+## Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npm run lint
+npx tsc --noEmit
+npx vitest run
+npm run build
+```
