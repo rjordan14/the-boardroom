@@ -57,7 +57,7 @@ export function MatchupRow({
   const statusBadge =
     state === "voted" ? (
       <span className="font-mono text-[9px] font-bold tracking-[0.1em] text-board-success">
-        ✓ BALLOT SEALED
+        ✓ VOTED
       </span>
     ) : state === "closed" || state === "awaiting_round" ? (
       <span className="font-mono text-[10px] font-bold tracking-[0.1em] text-board-tertiary">
